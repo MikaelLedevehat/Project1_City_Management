@@ -25,9 +25,7 @@ public class HumanMale extends Human {
 
     public Vector2 sendAdvances(ArrayList<Human> lf){
         for(Human f : lf){
-            System.out.println("coucou" + f);
             if(((HumanFemale)f).receiveAdvance(this)){
-                System.out.println("yop");
                 setCurrentPartner(f);
                 return f.getTransform().getPos();
             }
