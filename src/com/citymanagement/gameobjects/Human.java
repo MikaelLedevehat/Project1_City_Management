@@ -221,6 +221,7 @@ public abstract class Human extends GameObject {
 				setGoal(GoalType.REPRODUCE);
 			}
 		}
+		
 
 		if(_dest == null){
 			setDestination(selectRadomPlaceAround(200), true, null);
