@@ -94,6 +94,10 @@ public class MainWindow{
 		timer.start();
 	}
 
+	public void setSize(int h, int l){
+		windowFrame.setSize(h, l);
+	}
+
 	private void createMainWindow() {
 		windowFrame = new JFrame();
 		windowFrame.setTitle("Project1 : City Management");

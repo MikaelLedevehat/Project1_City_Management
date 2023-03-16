@@ -3,18 +3,19 @@ package com.citymanagement.gameobjects;
 import java.awt.Color;
 import java.util.Comparator;
 
+import com.citymanagement.gameobjects.PopulationFactory.HumanType;
 import com.customgraphicinterface.core.GameObject;
 import com.customgraphicinterface.geometry.Rectangle;
 import com.customgraphicinterface.utilities.Vector2;
 
 public abstract class Human extends GameObject {
 
-	private class Needs{
+	protected class Needs{
 
 		public static final float NEED_MAX_CAP = 200;
 		public static final float HUNGER_GROW_RATE = 0.05f;
 		public static final float THIRST_GROW_RATE = 0.1f;
-		public static final float REPRODUCTIVE_URGE_GROW_RATE = 0.05f;
+		public static final float REPRODUCTIVE_URGE_GROW_RATE = 0.3f;
 
 		private float _thirst;
 		private float _hunger;
@@ -117,6 +118,7 @@ public abstract class Human extends GameObject {
 	private InteractionState _interaction = InteractionState.NONE;
 	private Color _colorSave;
 	private Human _currentPartner;
+	private boolean _doInteract = true;
 	private GoalWorker[] _goalWorkers = new GoalWorker[]{
 		new GoalWorker(){ public void execute() { wander(); } },
 		new GoalWorker(){ public void execute() { drink(); } },
@@ -135,6 +137,18 @@ public abstract class Human extends GameObject {
 		_currentGoal = g;
 	}
 
+	protected Human getCurrentPartner(){
+		return _currentPartner;
+	}
+
+	protected void setCurrentPartner(Human h){
+		_currentPartner = h;
+	}
+
+	protected Needs getNeeds(){
+		return _needs;
+	}
+
 	public SexType getSex(){
 		return _sex;
 	}
@@ -148,7 +162,7 @@ public abstract class Human extends GameObject {
 		_sex = sex;
 		_needs = new Needs(0,0,0);
 		setMesh(new Rectangle(HUMANHEIGHT,HUMANWIDTH, new Vector2(-HUMANWIDTH/2f,-HUMANHEIGHT/2f), 0f, BORDER_COLOR, BORDER_SIZE, color, false));
-		getTransform().setPos(pos);
+		getTransform().setPos(pos==null?new Vector2():pos);
 		setZIndex(ZINDEX);
 	}
 		
@@ -159,7 +173,7 @@ public abstract class Human extends GameObject {
 
 		if( _dest != null) {
 			if(arrived()){
-				if(_interaction != InteractionState.DONE) interact();
+				if(_interaction != InteractionState.DONE && _doInteract) interact();
 				else {
 					executeGoal();
 					_interaction = InteractionState.NONE;
@@ -201,7 +215,7 @@ public abstract class Human extends GameObject {
 			}
 		} 
 		if(_needs.getReproductiveUrge() > 100 && _dest == null){
-			p = findSuitableNearestPartner();
+			p = findMate();
 			if(p != null){
 				setDestination(p, false, _currentPartner);
 				setGoal(GoalType.REPRODUCE);
@@ -211,11 +225,15 @@ public abstract class Human extends GameObject {
 		if(_dest == null){
 			setDestination(selectRadomPlaceAround(200), true, null);
 			setGoal(GoalType.WANDER);
+			_doInteract = false;
 		}
 	}
 
 	protected void executeGoal(){
 		if(_currentGoal != null) _goalWorkers[_currentGoal.ordinal()].execute();
+		_interaction = InteractionState.NONE;
+		_doInteract = true;
+		_dest = null;
 	}
 
 	protected boolean drink(){
@@ -228,11 +246,9 @@ public abstract class Human extends GameObject {
 		return true;
 	}
 
-	protected boolean reproduce(){
-		_needs.setReproductiveUrge(0);
-		if(_sex == SexType.FEMALE) population.addToPopulation(new HumanMale(population, null, BORDER_COLOR, BORDER_SIZE));
-		return true;
-	}
+	protected abstract Vector2 findMate();
+
+	protected abstract boolean reproduce();
 
 	protected void interact() {
 		if(_interactionTimer > 100){
@@ -250,8 +266,11 @@ public abstract class Human extends GameObject {
 		}
 	}
 
+	protected void endInteraction(){
+		_interaction = InteractionState.DONE;
+	}
+
 	protected boolean wander(){
-		_dest = null;
 		return true;
 	}
 
@@ -276,32 +295,13 @@ public abstract class Human extends GameObject {
 		return nearestFood;
 	}
 
-	protected Vector2 findSuitableNearestPartner(){
-		
-		Vector2 nearestParner = null;
-		for(Human h : population.getPopulationList()){
-			if(h.getSex() != _sex){
-				if(nearestParner == null){
-					nearestParner = h.getTransform().getPos();
-					_currentPartner = h;
-				}
-				else if(Vector2.dist(getTransform().getPos(), nearestParner) > Vector2.dist(getTransform().getPos(), h.getTransform().getPos())){
-					nearestParner = h.getTransform().getPos();
-					_currentPartner = h;
-				} 
-			}
-		}
-		
-		return nearestParner;
-	}
-
 	protected Vector2 selectRadomPlaceOnWorld(int w, int h, int x, int y) {
 		return new Vector2((float)Math.random()*w + x,
 				(float)Math.random()*h + y);
 	}
 
 	protected Vector2 selectRadomPlaceAround(float maxRadius) {
-		float angle = (float)(Math.random()*Math.PI);
+		float angle = (float)(Math.random()*Math.PI*2);
 		float radius = (float)(Math.random()*maxRadius);
 		return getTransform().getPos().plus( new Vector2((float)(Math.cos(angle) * radius), (float)(Math.sin(angle) * radius)));
 	}

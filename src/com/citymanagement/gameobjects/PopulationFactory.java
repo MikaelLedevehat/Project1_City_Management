@@ -17,20 +17,20 @@ public class PopulationFactory {
     public static IPopulation createHumanPopulation(int number, Object... options){
         IPopulation p = new HumanPopulation();
 
-        fillPopulation(p,10, options);
+        fillPopulation(p,number, options);
 
         return p;
     }
 
     private static void fillPopulation(IPopulation p, int n, Object... options){
         for(int i=0;i<n;i++){
-            p.addToPopulation(getHuman((HumanPopulation)p, HumanType.values()[(int)Math.round(Math.random())], options));
+            HumanType t = HumanType.values()[(int)Math.round(Math.random())];
+            p.addToPopulation(getHuman((HumanPopulation)p,t,options));
         }
     }
 
-    private static Human getHuman(HumanPopulation p, HumanType t, Object... options){
+    public static Human getHuman(HumanPopulation p, HumanType t, Object... options){
         Human g = null;
-
         Vector2 pos = null;
         int width = 0;
         int height = 0;
@@ -38,7 +38,7 @@ public class PopulationFactory {
 
         Object[] o = new Object[OPTIONS_LENGHT];
 
-        if(options != null) System.arraycopy(o, 0, options, 0, options.length>OPTIONS_LENGHT?OPTIONS_LENGHT:options.length);
+        if(options != null) System.arraycopy(options, 0, o, 0, options.length>OPTIONS_LENGHT?OPTIONS_LENGHT:options.length);
 
         try {
             pos = (Vector2)(o[0]!=null?o[0]:null);
@@ -54,7 +54,7 @@ public class PopulationFactory {
             case DEFAULT_MALE: g = new HumanMale(p, pos==null?new Vector2():pos, color==null?HumanMale.DEFAULT_COLOR:color, HumanMale.DEFAULT_ATTARCTIVNESS);
             break;
 
-            case DEFUALT_FEMALE: new HumanFemale(p, pos==null?new Vector2():pos, color==null?HumanMale.DEFAULT_COLOR:color);
+            case DEFUALT_FEMALE: g = new HumanFemale(p, pos==null?new Vector2():pos, color==null?HumanFemale.DEFAULT_COLOR:color);
             break;
         }
 

@@ -12,6 +12,7 @@ public class Launcher{
 			@Override
 			public void run() {
 				MainWindow mainWindow = MainWindow.getInstance();
+				mainWindow.setSize(1500, 500);
 				GameManager gm = new GameManager();
 				mainWindow.run();
 			}
