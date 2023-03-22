@@ -29,7 +29,7 @@ public class HumanFemale extends Human {
     }
 
     public boolean receiveAdvance(HumanMale h){
-        boolean r = Math.sqrt(h.getAttractivness() / 100f) > Math.random() + 0.5f;
+        boolean r = true;//Math.sqrt(h.getAttractivness() / 100f) > Math.random() + 0.5f;
         if(r){
             setCurrentPartner(h);
         }

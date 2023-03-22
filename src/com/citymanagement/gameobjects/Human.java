@@ -2,63 +2,15 @@ package com.citymanagement.gameobjects;
 
 import java.awt.Color;
 import java.util.Comparator;
+import java.util.HashMap;
 
-import com.citymanagement.gameobjects.PopulationFactory.HumanType;
+import com.citymanagement.gameobjects.Needs;
+import com.citymanagement.gameobjects.Needs.Need;
 import com.customgraphicinterface.core.GameObject;
 import com.customgraphicinterface.geometry.Rectangle;
 import com.customgraphicinterface.utilities.Vector2;
 
 public abstract class Human extends GameObject {
-
-	protected class Needs{
-
-		public static final float NEED_MAX_CAP = 200;
-		public static final float HUNGER_GROW_RATE = 0.05f;
-		public static final float THIRST_GROW_RATE = 0.1f;
-		public static final float REPRODUCTIVE_URGE_GROW_RATE = 0.3f;
-
-		private float _thirst;
-		private float _hunger;
-		private float _reproductiveUrge;
-
-		public Needs(int t, int h, int r){
-			setHunger(h);
-			setReproductiveUrge(r);
-			setThirst(t);
-		}
-
-		public float getHunger(){
-			return _hunger;
-		}
-		public float getThirst(){
-			return _thirst;
-		}
-		public float getReproductiveUrge(){
-			return _reproductiveUrge;
-		}
-
-		public void setHunger(float h) {
-			if(h < 0) this._hunger = 0;
-			else if(Needs.NEED_MAX_CAP < h) this._hunger = Needs.NEED_MAX_CAP;
-			else this._hunger = h;
-		}
-		public void setThirst(float t) {
-			if(t < 0) this._thirst = 0;
-			else if(Needs.NEED_MAX_CAP < t) this._thirst = Needs.NEED_MAX_CAP;
-			else this._thirst = t;
-		}
-		public void setReproductiveUrge(float r) {
-			if(r < 0) this._reproductiveUrge = 0;
-			else if(Needs.NEED_MAX_CAP < r) this._reproductiveUrge = Needs.NEED_MAX_CAP;
-			else this._reproductiveUrge = r;
-		}
-
-		public void updateAllNeeds(){
-			setHunger(getHunger() + Needs.HUNGER_GROW_RATE);
-			setThirst(getThirst() + Needs.THIRST_GROW_RATE);
-			setReproductiveUrge(getReproductiveUrge() + Needs.REPRODUCTIVE_URGE_GROW_RATE);
-		}
-	}
 
 	public class Destination {
 		public Vector2 pos;
@@ -160,7 +112,12 @@ public abstract class Human extends GameObject {
 	public Human(HumanPopulation pop, SexType sex, Vector2 pos, Color color) {
 		this.population = pop;
 		_sex = sex;
-		_needs = new Needs(0,0,0);
+		
+		_needs = new Needs();
+		_needs.addNeed("hunger",0, 200, 0.2f, ()->findNearestFood());
+		_needs.addNeed("thirst",0, 200, 0.2f, ()->findNearestWaterSource());
+		_needs.addNeed("reproductiveUrge",0, 200, 0.2f, ()->findMate());
+
 		setMesh(new Rectangle(HUMANHEIGHT,HUMANWIDTH, new Vector2(-HUMANWIDTH/2f,-HUMANHEIGHT/2f), 0f, BORDER_COLOR, BORDER_SIZE, color, false));
 		getTransform().setPos(pos==null?new Vector2():pos);
 		setZIndex(ZINDEX);
@@ -198,7 +155,6 @@ public abstract class Human extends GameObject {
 	}
 
 	protected void selectDestination() {
-		//getTransform().rot += 0.1f;
 		Vector2 p;
 		if(_needs.getThirst() > 50 && _dest == null){
 			p = findNearestWaterSource();
@@ -213,21 +169,49 @@ public abstract class Human extends GameObject {
 				setDestination(p, true, null);
 				setGoal(GoalType.EAT);
 			}
-		} 
-		if(_needs.getReproductiveUrge() > 100 && _dest == null){
+		}
+		if(_needs.getReproductiveUrge() > 50 && _dest == null){
 			p = findMate();
 			if(p != null){
-				setDestination(p, false, _currentPartner);
-				setGoal(GoalType.REPRODUCE);
+				setDestination(p, true, null);
+				setGoal(GoalType.EAT);
 			}
 		}
-		
+
+		/*float tot = this._needs._hunger/Needs.NEED_MAX_CAP + this._needs._thirst/Needs.NEED_MAX_CAP + this._needs._reproductiveUrge/Needs.NEED_MAX_CAP;
+		float[] proba;
+		if(tot < 100f){
+			proba = new float[4];
+			proba[0] =  100f - tot;
+			proba[1] = proba[0] + this._needs._thirst/Needs.NEED_MAX_CAP;
+			proba[2] = proba[1] + this._needs._hunger/Needs.NEED_MAX_CAP;
+			proba[3] = proba[2] + this._needs._reproductiveUrge/Needs.NEED_MAX_CAP;
+			
+		}else{
+			proba = new float[3];
+			proba[0] = this._needs._thirst/(Needs.NEED_MAX_CAP*(tot/100f));
+			proba[1] = proba[0] + this._needs._hunger/(Needs.NEED_MAX_CAP*(tot/100f));
+			proba[2] = proba[1] + this._needs._reproductiveUrge/(Needs.NEED_MAX_CAP*(tot/100f));
+		}
+
+		float tirage = (float)Math.random();
+		for(int i =0;i<proba.length;i++){
+			if(proba[i] > tirage){
+				setGoal(GoalType.values()[i]);
+			}
+		}*/
 
 		if(_dest == null){
 			setDestination(selectRadomPlaceAround(200), true, null);
 			setGoal(GoalType.WANDER);
 			_doInteract = false;
 		}
+	}
+
+	protected void setMate(Human h){
+		setCurrentPartner(h);
+		setDestination(h.getTransform().getPos(), false, _currentPartner);
+		setGoal(GoalType.REPRODUCE);
 	}
 
 	protected void executeGoal(){
