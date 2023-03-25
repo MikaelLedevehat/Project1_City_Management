@@ -36,7 +36,8 @@ public class HumanMale extends Human {
 
     @Override
     protected boolean reproduce() {
-        getNeeds().getNeed("reproductiveUrge").setCurrentValue(0);
+        System.out.println("yp");
+        getNeeds().getNeed("reproductiveUrge").setCurrentValue(0f);
         setCurrentPartner(null);
         return true;
     }
@@ -52,10 +53,11 @@ public class HumanMale extends Human {
         Human f = sendAdvances(sortedHumanFemales);
 
         if(f != null){
-            System.out.println("yop");
-            setCurrentPartner(f);
-            setDestination(f.getTransform().getPos(), false, f);
+            System.out.println("caca");
             setGoal(()->reproduce());
+            setCurrentPartner(f);
+            setDestination(f);
+            
         }
     }
 
