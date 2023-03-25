@@ -47,6 +47,7 @@ public class CustomDrawingPanel extends JPanel{
         return new Dimension(1400,800);
     }
 
+	@Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 

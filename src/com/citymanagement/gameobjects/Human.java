@@ -2,15 +2,16 @@ package com.citymanagement.gameobjects;
 
 import java.awt.Color;
 import java.util.Comparator;
-import java.util.HashMap;
-
-import com.citymanagement.gameobjects.Needs;
 import com.citymanagement.gameobjects.Needs.Need;
 import com.customgraphicinterface.core.GameObject;
 import com.customgraphicinterface.geometry.Rectangle;
 import com.customgraphicinterface.utilities.Vector2;
 
 public abstract class Human extends GameObject {
+
+	protected interface GoalExecute{
+		public void execute();
+	}
 
 	public class Destination {
 		public Vector2 pos;
@@ -29,20 +30,9 @@ public abstract class Human extends GameObject {
 		}
 	}
 
-	private interface GoalWorker{
-		void execute();
-	}
-
 	public enum SexType {
 		MALE,
 		FEMALE,
-	}
-
-	private enum GoalType{
-		WANDER,
-		DRINK,
-		EAT,
-		REPRODUCE,
 	}
 
 	private enum InteractionState{
@@ -65,18 +55,12 @@ public abstract class Human extends GameObject {
 	private SexType _sex;
 	private Destination _dest;
 	private Needs _needs;
-	private GoalType _currentGoal;
+	private GoalExecute _currentGoal;
 	private float _interactionTimer = 0;
 	private InteractionState _interaction = InteractionState.NONE;
 	private Color _colorSave;
 	private Human _currentPartner;
 	private boolean _doInteract = true;
-	private GoalWorker[] _goalWorkers = new GoalWorker[]{
-		new GoalWorker(){ public void execute() { wander(); } },
-		new GoalWorker(){ public void execute() { drink(); } },
-		new GoalWorker(){ public void execute() { eat(); } },
-		new GoalWorker(){ public void execute() { reproduce(); } },
-	};
 
 	public void setDestination(Vector2 dest , boolean fixe, GameObject t) {
 		_dest = new Destination();
@@ -85,8 +69,8 @@ public abstract class Human extends GameObject {
 		_dest.target = t;
 	}
 	
-	public void setGoal(GoalType g){
-		_currentGoal = g;
+	public void setGoal(GoalExecute fc){
+		_currentGoal = fc;
 	}
 
 	protected Human getCurrentPartner(){
@@ -114,9 +98,9 @@ public abstract class Human extends GameObject {
 		_sex = sex;
 		
 		_needs = new Needs();
-		_needs.addNeed("hunger",0, 200, 0.2f, ()->findNearestFood());
-		_needs.addNeed("thirst",0, 200, 0.2f, ()->findNearestWaterSource());
-		_needs.addNeed("reproductiveUrge",0, 200, 0.2f, ()->findMate());
+		_needs.addNeed("hunger",0, 200, 0.2f, ()->findNearestFood(), ()->die());
+		_needs.addNeed("thirst",0, 200, 0.2f, ()->findNearestWaterSource(), ()->die());
+		_needs.addNeed("reproductiveUrge",0, 200, 0.2f, ()->findMate(),null);
 
 		setMesh(new Rectangle(HUMANHEIGHT,HUMANWIDTH, new Vector2(-HUMANWIDTH/2f,-HUMANHEIGHT/2f), 0f, BORDER_COLOR, BORDER_SIZE, color, false));
 		getTransform().setPos(pos==null?new Vector2():pos);
@@ -126,7 +110,6 @@ public abstract class Human extends GameObject {
 	@Override
 	public void update() {
 		_needs.updateAllNeeds();
-		checkIfAlive();
 
 		if( _dest != null) {
 			if(arrived()){
@@ -146,92 +129,45 @@ public abstract class Human extends GameObject {
 	}
 
 	protected void updateDestination() {
+		if(_dest.target == null) return;
 		setDestination(_dest.target.getTransform().getPos(), false, _currentPartner);
 	}
 
-	protected void checkIfAlive() {
-		if(_needs.getHunger() >= Needs.NEED_MAX_CAP) die();
-		if(_needs.getThirst() >= Needs.NEED_MAX_CAP) die();
-	}
-
 	protected void selectDestination() {
-		Vector2 p;
-		if(_needs.getThirst() > 50 && _dest == null){
-			p = findNearestWaterSource();
-			if(p != null){
-				setDestination(p, true, null);
-				setGoal(GoalType.DRINK);
-			}
-		} 
-		if(_needs.getHunger() > 50 && _dest == null){
-			p = findNearestFood();
-			if(p != null){
-				setDestination(p, true, null);
-				setGoal(GoalType.EAT);
-			}
-		}
-		if(_needs.getReproductiveUrge() > 50 && _dest == null){
-			p = findMate();
-			if(p != null){
-				setDestination(p, true, null);
-				setGoal(GoalType.EAT);
-			}
-		}
 
-		/*float tot = this._needs._hunger/Needs.NEED_MAX_CAP + this._needs._thirst/Needs.NEED_MAX_CAP + this._needs._reproductiveUrge/Needs.NEED_MAX_CAP;
-		float[] proba;
-		if(tot < 100f){
-			proba = new float[4];
-			proba[0] =  100f - tot;
-			proba[1] = proba[0] + this._needs._thirst/Needs.NEED_MAX_CAP;
-			proba[2] = proba[1] + this._needs._hunger/Needs.NEED_MAX_CAP;
-			proba[3] = proba[2] + this._needs._reproductiveUrge/Needs.NEED_MAX_CAP;
-			
-		}else{
-			proba = new float[3];
-			proba[0] = this._needs._thirst/(Needs.NEED_MAX_CAP*(tot/100f));
-			proba[1] = proba[0] + this._needs._hunger/(Needs.NEED_MAX_CAP*(tot/100f));
-			proba[2] = proba[1] + this._needs._reproductiveUrge/(Needs.NEED_MAX_CAP*(tot/100f));
-		}
+		Need[] nArr = _needs.sortNeedsByPriority();
 
-		float tirage = (float)Math.random();
-		for(int i =0;i<proba.length;i++){
-			if(proba[i] > tirage){
-				setGoal(GoalType.values()[i]);
-			}
-		}*/
+		for(Need n : nArr){
+			if(n==null) continue;
+			if(n.getCurrentValue() > 50f) n.getActionFulfilNeed().execute();
+			if(_dest != null) break;
+		}
 
 		if(_dest == null){
 			setDestination(selectRadomPlaceAround(200), true, null);
-			setGoal(GoalType.WANDER);
+			setGoal(()->wander());
 			_doInteract = false;
 		}
 	}
 
-	protected void setMate(Human h){
-		setCurrentPartner(h);
-		setDestination(h.getTransform().getPos(), false, _currentPartner);
-		setGoal(GoalType.REPRODUCE);
-	}
-
 	protected void executeGoal(){
-		if(_currentGoal != null) _goalWorkers[_currentGoal.ordinal()].execute();
+		if(_currentGoal != null) _currentGoal.execute();
 		_interaction = InteractionState.NONE;
 		_doInteract = true;
 		_dest = null;
 	}
 
 	protected boolean drink(){
-		_needs.setThirst(0);
+		_needs.getNeed("thrist").setCurrentValue(0);
 		return true;
 	}
 
 	protected boolean eat(){
-		_needs.setHunger(0);
+		_needs.getNeed("hunger").setCurrentValue(0);
 		return true;
 	}
 
-	protected abstract Vector2 findMate();
+	protected abstract void findMate();
 
 	protected abstract boolean reproduce();
 
@@ -259,16 +195,16 @@ public abstract class Human extends GameObject {
 		return true;
 	}
 
-	protected Vector2 findNearestWaterSource(){
+	protected void findNearestWaterSource(){
 		Vector2 nearestSource = null;
 		/*for(Terrain t : world.getWaterSources()){
 			if(nearestSource == null) nearestSource = t.getTransform().pos;
 			else if(Vector2.dist(getTransform().pos, nearestSource) > Vector2.dist(getTransform().pos, t.getTransform().pos)) nearestSource = t.getTransform().pos;
 		}*/
-		return nearestSource;
+		//return nearestSource;
 	}
 	
-	protected Vector2 findNearestFood(){
+	protected void findNearestFood(){
 		Vector2 nearestFood = null;
 		
 		/*for(Ressource r : world.getRessources()){
@@ -277,7 +213,7 @@ public abstract class Human extends GameObject {
 				else if(Vector2.dist(getTransform().pos, nearestFood) > Vector2.dist(getTransform().pos, r.getTransform().pos)) nearestFood = r.getTransform().pos;
 			}
 		}*/
-		return nearestFood;
+		//return nearestFood;
 	}
 
 	protected Vector2 selectRadomPlaceOnWorld(int w, int h, int x, int y) {

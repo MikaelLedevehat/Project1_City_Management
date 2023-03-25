@@ -23,11 +23,11 @@ public class HumanMale extends Human {
         this._attractivness = attractivness;
     }
 
-    public Vector2 sendAdvances(ArrayList<Human> lf){
+    public Human sendAdvances(ArrayList<Human> lf){
         for(Human f : lf){
             if(((HumanFemale)f).receiveAdvance(this)){
                 setCurrentPartner(f);
-                return f.getTransform().getPos();
+                return f;
             }
         }
         return null;
@@ -36,19 +36,27 @@ public class HumanMale extends Human {
 
     @Override
     protected boolean reproduce() {
-        getNeeds().setReproductiveUrge(0);
+        getNeeds().getNeed("reproductiveUrge").setCurrentValue(0);
+        setCurrentPartner(null);
         return true;
     }
 
     @Override
-    protected Vector2 findMate() {
+    protected void findMate() {
+        System.out.println("null");
         ArrayList<Human> sortedHumanFemales = new ArrayList<>();
-		
         addAllFemalesIntoList(sortedHumanFemales);
 
         sortListTowardNearest(sortedHumanFemales);
 
-        return sendAdvances(sortedHumanFemales);
+        Human f = sendAdvances(sortedHumanFemales);
+
+        if(f != null){
+            System.out.println("yop");
+            setCurrentPartner(f);
+            setDestination(f.getTransform().getPos(), false, f);
+            setGoal(()->reproduce());
+        }
     }
 
     private void sortListTowardNearest(ArrayList<Human> sortedHumanFemales) {

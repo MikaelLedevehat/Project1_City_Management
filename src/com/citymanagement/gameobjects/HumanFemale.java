@@ -38,15 +38,15 @@ public class HumanFemale extends Human {
 
     @Override
     protected boolean reproduce() {
-        getNeeds().setReproductiveUrge(0);
+        getNeeds().getNeed("reproductiveUrge").setCurrentValue(0);
         _babyFather = getCurrentPartner();
         gestate();
         return true;
     }
 
     @Override
-    protected Vector2 findMate() {
-        return null;
+    protected void findMate() {
+        //return null;
     }
     
 }
