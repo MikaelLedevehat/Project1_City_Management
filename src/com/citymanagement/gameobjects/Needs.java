@@ -1,6 +1,7 @@
 package com.citymanagement.gameobjects;
 
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
+
 import com.citymanagement.gameobjects.Needs.Need.Command;
 
 public class Needs{
@@ -63,19 +64,27 @@ public class Needs{
             _growRate = v;
         }
         public void setActionFulfilNeed(Command c){
-            if(c == null) throw new NullPointerException("The command to fulfil this need can't be null");
+            //if(c == null) throw new NullPointerException("The command to fulfil this need can't be null");
             _actionFulfilNeed = c;
         }
 
         public void setActionNeedMaxCapReached(Command c){
             _actionNeedMaxCapReached = c;
         }
+        
+        public boolean executeActionToFulfillNeed(){
+            if(this.getActionFulfilNeed() == null) return false;
+            else{
+                this.getActionFulfilNeed().execute();
+                return true;
+            }
+        }
     }
 
-    private final HashMap<String, Need> _needList;
+    private final ConcurrentHashMap<String, Need> _needList;
 
     public Needs(){
-        _needList = new HashMap<>();
+        _needList = new ConcurrentHashMap<>();
     }
 
     public boolean addNeed(String name, float currVal, float maxCap, float growRate, Command actionFulfil, Command actionMaxCap){
@@ -117,6 +126,7 @@ public class Needs{
         int index = -1;
 
         for(int i=0;i<nds.length;i++){
+            index = i;
             for (int j=0;j<nds.length-i;j++) {
                 if(max < ((Need)nds[i + j]).getCurrentValue()){
                     max = ((Need)nds[i + j]).getCurrentValue();
@@ -134,7 +144,7 @@ public class Needs{
 
     public void updateAllNeeds(){
         for(Need n : _needList.values()){
-            n.setCurrentValue(n.getCurrentValue() + n.getGrowRate());
+           n.setCurrentValue( n.getCurrentValue() + n.getGrowRate());
             checkNeedReachedMaxCap(n);
         }
     }

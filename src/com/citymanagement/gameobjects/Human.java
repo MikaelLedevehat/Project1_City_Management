@@ -47,7 +47,7 @@ public abstract class Human extends GameObject {
 	public static final Color BORDER_COLOR = Color.BLACK;
 	public static final int BORDER_SIZE = 2;
 	public static final float SPEED = 3f;
-	public static final float INTERATION_SPEED = 0.8f;
+	public static final float INTERATION_SPEED = 1f;
 
 	public final HumanPopulation population;
 
@@ -59,7 +59,7 @@ public abstract class Human extends GameObject {
 	private InteractionState _interaction = InteractionState.NONE;
 	private Color _colorSave;
 	private Human _currentPartner;
-	private boolean _doInteract = true;
+	private int _interactionDuration = 0;
 
 	public void setDestination(Vector2 dest) {
 		_dest.pos = dest;
@@ -72,8 +72,13 @@ public abstract class Human extends GameObject {
 		_dest.target = t;
 	}
 
-	public void setGoal(GoalExecute fc){
+	protected Destination getDestination(){
+		return _dest;
+	}
+
+	public void setGoal(GoalExecute fc, int duration){
 		_currentGoal = fc;
+		_interactionDuration = duration > 0? duration:0;
 	}
 
 	protected Human getCurrentPartner(){
@@ -103,7 +108,7 @@ public abstract class Human extends GameObject {
 		_needs = new Needs();
 		_needs.addNeed("hunger",0, 200, 0.2f, ()->findNearestFood(), ()->die());
 		_needs.addNeed("thirst",0, 200, 0.2f, ()->findNearestWaterSource(), ()->die());
-		_needs.addNeed("reproductiveUrge",0, 200, 0.2f, ()->findMate(),null);
+		_needs.addNeed("reproductiveUrge",100, 200, 0.2f, ()->findMate(),null);
 
 		setMesh(new Rectangle(HUMANHEIGHT,HUMANWIDTH, new Vector2(-HUMANWIDTH/2f,-HUMANHEIGHT/2f), 0f, BORDER_COLOR, BORDER_SIZE, color, false));
 		getTransform().setPos(pos==null?new Vector2():pos);
@@ -113,10 +118,9 @@ public abstract class Human extends GameObject {
 	@Override
 	public void update() {
 		_needs.updateAllNeeds();
-
 		if( _dest.pos != null) {
 			if(arrived()){
-				if(_interaction != InteractionState.DONE && _doInteract) interact();
+				if(_interaction != InteractionState.DONE && _interactionDuration > 0) interact();
 				else {
 					executeGoal();
 					_interaction = InteractionState.NONE;
@@ -137,34 +141,30 @@ public abstract class Human extends GameObject {
 	}
 
 	protected void selectDestination() {
-
 		Need[] nArr = _needs.sortNeedsByPriority();
 
 		for(Need n : nArr){
-			//System.out.println(n.getName()  + "-"+ n.getCurrentValue());
 			if(n==null) continue;
 			if(n.getCurrentValue() > 50f) {
-				n.getActionFulfilNeed().execute();
-				System.out.println("marcel" + _currentGoal);
+				if(n.executeActionToFulfillNeed() == false) continue;
 			}
 			
 			if(_dest.pos != null) break;
 		}
-		
-		//System.out.println("nanana" + _dest.pos);
 
 		if(_dest.pos == null){
 			setDestination(selectRadomPlaceAround(200));
-			setGoal(()->wander());
-			_doInteract = false;
+			setGoal(()->wander(), 0);
+			//_doInteract = false;
 		}
 
 	}
 
 	protected void executeGoal(){
-		if(_currentGoal != null) _currentGoal.execute();
+		if(_currentGoal != null){
+			_currentGoal.execute();
+		}
 		_interaction = InteractionState.NONE;
-		_doInteract = true;
 		_currentGoal = null;
 		setDestination((GameObject)null);
 	}
@@ -184,10 +184,9 @@ public abstract class Human extends GameObject {
 	protected abstract boolean reproduce();
 
 	protected void interact() {
-		if(_interactionTimer > 100){
+		if(_interactionTimer > _interactionDuration){
 			getMesh().setFillColor(_colorSave);
 			_interactionTimer = 0;
-			setDestination((GameObject) null);
 			_interaction = InteractionState.DONE;
 		}else{
 			if(getMesh().getFillColor() != Human.INTERACTION_COLOR) {

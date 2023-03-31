@@ -11,27 +11,34 @@ public class HumanFemale extends Human {
     public final static int DEFAULT_GESTATION_TIME = 200;
     public final static Color DEFAULT_GESTATION_COLOR = Color.red;
 
-    private Human _babyFather;
+    private boolean _isPregnant = false;
 
     public HumanFemale(HumanPopulation pop, Vector2 pos, Color color) {
         super(pop, SexType.FEMALE, pos, color);
-        //TODO Auto-generated constructor stub
     }
 
     private void birth(){
-        int r = (int)Math.round(Math.random() * 2);
+        int r = (int)(Math.random() * 2);
 		population.addToPopulation(PopulationFactory.getHuman(population, HumanType.values()[r], this.getTransform().getPos()));
         this.getMesh().setFillColor(DEFAULT_COLOR);
+        this.getNeeds().removeNeed("birth");
     }
 
     private void gestate(){
-
+        this.getMesh().setFillColor(DEFAULT_GESTATION_COLOR);
+        this.getNeeds().addNeed("birth", 0, DEFAULT_GESTATION_TIME, 1, null, ()->birth());
+        _isPregnant = true;
     }
 
     public boolean receiveAdvance(HumanMale h){
-        boolean r = true;//Math.sqrt(h.getAttractivness() / 100f) > Math.random() + 0.5f;
+        if(_isPregnant) return false;
+
+        //boolean r = Math.sqrt(h.getAttractivness() / 100f) > Math.random() + 0.5f;
+        boolean r = true;
         if(r){
+            setGoal(()->reproduce(),100);
             setCurrentPartner(h);
+            setDestination(h);
         }
         return r;
     }
@@ -39,7 +46,7 @@ public class HumanFemale extends Human {
     @Override
     protected boolean reproduce() {
         getNeeds().getNeed("reproductiveUrge").setCurrentValue(0);
-        _babyFather = getCurrentPartner();
+        setCurrentPartner(null);
         gestate();
         return true;
     }

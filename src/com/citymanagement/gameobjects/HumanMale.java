@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Comparator;
 
+import com.citymanagement.gameobjects.Needs.Need;
 import com.customgraphicinterface.utilities.Vector2;
 
 public class HumanMale extends Human {
@@ -36,7 +37,6 @@ public class HumanMale extends Human {
 
     @Override
     protected boolean reproduce() {
-        System.out.println("yp");
         getNeeds().getNeed("reproductiveUrge").setCurrentValue(0f);
         setCurrentPartner(null);
         return true;
@@ -44,7 +44,6 @@ public class HumanMale extends Human {
 
     @Override
     protected void findMate() {
-        System.out.println("null");
         ArrayList<Human> sortedHumanFemales = new ArrayList<>();
         addAllFemalesIntoList(sortedHumanFemales);
 
@@ -53,8 +52,7 @@ public class HumanMale extends Human {
         Human f = sendAdvances(sortedHumanFemales);
 
         if(f != null){
-            System.out.println("caca");
-            setGoal(()->reproduce());
+            setGoal(()->reproduce(),100);
             setCurrentPartner(f);
             setDestination(f);
             
