@@ -3,8 +3,6 @@ package com.citymanagement.gameobjects;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Comparator;
-
-import com.citymanagement.gameobjects.Needs.Need;
 import com.customgraphicinterface.utilities.Vector2;
 
 public class HumanMale extends Human {

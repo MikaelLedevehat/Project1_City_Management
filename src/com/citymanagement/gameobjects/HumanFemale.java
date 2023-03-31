@@ -31,6 +31,7 @@ public class HumanFemale extends Human {
     }
 
     public boolean receiveAdvance(HumanMale h){
+        if(getCurrentPartner() != null) return false;
         if(_isPregnant) return false;
 
         //boolean r = Math.sqrt(h.getAttractivness() / 100f) > Math.random() + 0.5f;
