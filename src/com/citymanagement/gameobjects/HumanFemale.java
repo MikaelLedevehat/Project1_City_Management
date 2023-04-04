@@ -20,12 +20,12 @@ public class HumanFemale extends Human {
     private void birth(){
         int r = (int)(Math.random() * 2);
 		population.addToPopulation(PopulationFactory.getHuman(population, HumanType.values()[r], this.getTransform().getPos()));
-        this.getMesh().setFillColor(DEFAULT_COLOR);
+        this.getMesh(0).setFillColor(DEFAULT_COLOR);
         this.getNeeds().removeNeed("birth");
     }
 
     private void gestate(){
-        this.getMesh().setFillColor(DEFAULT_GESTATION_COLOR);
+        this.getMesh(0).setFillColor(DEFAULT_GESTATION_COLOR);
         this.getNeeds().addNeed("birth", 0, DEFAULT_GESTATION_TIME, 1, null, ()->birth());
         _isPregnant = true;
     }

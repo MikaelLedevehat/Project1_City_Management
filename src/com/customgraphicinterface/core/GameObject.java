@@ -1,6 +1,7 @@
 package com.customgraphicinterface.core;
 
 import java.awt.Graphics2D;
+import java.util.ArrayList;
 
 import com.customgraphicinterface.UI.Camera;
 import com.customgraphicinterface.geometry.CustomShape;
@@ -12,7 +13,7 @@ public abstract class GameObject implements ISubsciber, ITransformable{
 
 	private static int _gameObjectIdCounter = 0;
 	private long _gameObjectId;
-	private CustomShape _meshObject;
+	private final ArrayList<CustomShape> _meshObjects;
 	private final Transform _transform;
 	private int _zIndex;
 
@@ -29,16 +30,33 @@ public abstract class GameObject implements ISubsciber, ITransformable{
 		return _transform;
 	}
 
-	protected CustomShape getMesh(){
-		return _meshObject;
+	protected CustomShape getMesh(int index){
+		return _meshObjects.get(index);
 	}
 	
-	protected void setMesh(CustomShape d){
-		_meshObject = d;
+	protected void addMesh(CustomShape s){
+		_meshObjects.add(s);
+	}
+
+	protected void removeMesh(int index){
+		CustomShape c = _meshObjects.remove(index);
+		if(c!=null) c.destroy();
+	}
+
+	protected void removeMesh(CustomShape s){
+		_meshObjects.remove(s);
+		s.destroy();
+	}
+
+	private void destroyMeshes(){
+		for(int i=0; i<_meshObjects.size();i++){
+			removeMesh(i);
+		}
 	}
 
 	public GameObject() {
 		//_meshObject = s;
+		_meshObjects = new ArrayList<>();
 		_transform = new Transform(new Vector2(), 0, new Vector2(1f,1f));
 		_gameObjectId = GameObject._gameObjectIdCounter;
 		GameObject._gameObjectIdCounter ++;
@@ -55,7 +73,7 @@ public abstract class GameObject implements ISubsciber, ITransformable{
 		EventManager.getInstance().unsubscribe("update", this);
 		EventManager.getInstance().unsubscribe("draw", this);
 
-		_meshObject.destroy();
+		destroyMeshes();
 	}
 
 	@Override
@@ -69,7 +87,10 @@ public abstract class GameObject implements ISubsciber, ITransformable{
 
 	public final void draw(Graphics2D g2d, Camera c){
 		
-		if(_meshObject != null) _meshObject.drawShape(g2d, c, getTransform().getWorldCoord());
+		if(_meshObjects == null) return;
+		for(int i=0; i < _meshObjects.size();i++){
+			_meshObjects.get(i).drawShape(g2d, c, getTransform().getWorldCoord());
+		}
 	}
 
 	public abstract void update();

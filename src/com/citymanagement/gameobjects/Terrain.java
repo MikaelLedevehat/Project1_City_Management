@@ -22,24 +22,24 @@ public class Terrain extends GameObject{
 	};
 
 	public int getHeight(){
-		return ((Rectangle)getMesh()).getHeight();
+		return ((Rectangle)getMesh(0)).getHeight();
 	}
 
 	public void setHeight(int h){
-		((Rectangle)getMesh()).setHeight(h);
+		((Rectangle)getMesh(0)).setHeight(h);
 	}
 
 	public int getWidth(){
-		return ((Rectangle)getMesh()).getWidth();
+		return ((Rectangle)getMesh(0)).getWidth();
 	}
 
 	public void setWidth(int w){
-		((Rectangle) getMesh()).setWidth(w);
+		((Rectangle) getMesh(0)).setWidth(w);
 	}
 
 	public Terrain(Type type, int height, int width, Vector2 pos) {
 
-		setMesh(new Rectangle(height,width,new Vector2(), 0f,_settings[type.ordinal()].borderColor,_settings[type.ordinal()].borderSize,_settings[type.ordinal()].fillColor,_settings[type.ordinal()].lockedOnScreen));
+		addMesh(new Rectangle(height,width,new Vector2(), 0f,_settings[type.ordinal()].borderColor,_settings[type.ordinal()].borderSize,_settings[type.ordinal()].fillColor,_settings[type.ordinal()].lockedOnScreen,false));
 		_type = type;
 		getTransform().setPos(pos);
 

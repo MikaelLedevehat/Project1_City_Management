@@ -9,8 +9,6 @@ import javax.swing.JPanel;
 import com.customgraphicinterface.pubsub.EventManager;
 import com.customgraphicinterface.pubsub.EventManager.Channel;
 import com.customgraphicinterface.pubsub.ISubsciber;
-
-import java.awt.geom.AffineTransform;
 import java.awt.Graphics2D;
 
 public class CustomDrawingPanel extends JPanel{
@@ -48,9 +46,9 @@ public class CustomDrawingPanel extends JPanel{
 		Graphics2D g2d = (Graphics2D)g;
 		
         for (ISubsciber e : _drawChannel.subs) {
-			AffineTransform old = g2d.getTransform();
+			
 			e.onEventRecieved(_drawChannel.name, g2d, _mainCamera);
-			g2d.setTransform(old);
+			
 		}
     }
 

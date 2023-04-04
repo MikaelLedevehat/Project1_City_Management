@@ -22,11 +22,12 @@ public class Rectangle extends CustomShape {
 	public void setWidth(int width) {
 		this._rectangle.width = width;
 	}
-	public Rectangle(int height,int width, Vector2 offset, Float baseRotation,  Color borderColor, int borderSize, Color fillColor, boolean lockedOnScreen ) {
+	public Rectangle(int height,int width, Vector2 offset, Float baseRotation,  Color borderColor, int borderSize, Color fillColor, boolean lockedOnScreen, boolean lockedRotation ) {
 		// TODO Auto-generated constructor stub
 		super(new java.awt.Rectangle());
 		_rectangle = (java.awt.Rectangle) getShape();
 		setLockedOnScreen(lockedOnScreen);
+		setLockedRotation(lockedRotation);
 		setWidth(width);
 		setHeight(height);
 		setBorderColor(borderColor);
@@ -38,6 +39,6 @@ public class Rectangle extends CustomShape {
 	}
 
 	public Rectangle(){
-		this(10,10,new Vector2(),0f,Color.black,2,Color.white,false);
+		this(10,10,new Vector2(),0f,Color.black,2,Color.white,false,false);
 	}
 }

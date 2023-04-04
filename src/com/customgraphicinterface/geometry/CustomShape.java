@@ -1,23 +1,24 @@
 package com.customgraphicinterface.geometry;
 
 import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 
 import com.customgraphicinterface.UI.ICamera;
 import com.customgraphicinterface.core.Transform;
 import com.customgraphicinterface.utilities.Vector2;
 
 import java.awt.Color;
-
 import java.awt.BasicStroke;
 
 abstract public class CustomShape {
 	private static int _shapeIdCounter = 0;
 	private final long _shapeId;
 
-	private Color _fillColor;
-	private Color _borderColor;
-	private int _borderSize;
-	private boolean _lockedOnScreen;
+	private Color _fillColor = Color.white;
+	private Color _borderColor = Color.BLACK;
+	private int _borderSize = 1;
+	private boolean _lockedOnScreen = false;
+	private boolean _lockedRotation = false;
 	private java.awt.geom.RectangularShape _shape;
 	private Vector2 _offset = new Vector2();
 	private float _baseRotation = 0f;
@@ -80,6 +81,14 @@ abstract public class CustomShape {
 		this._lockedOnScreen = l;
 	}
 
+	public boolean getLockedRotation() {
+		return _lockedRotation;
+	}
+
+	public void setLockedRotation(Boolean l) {
+		this._lockedRotation = l;
+	}
+
 	public CustomShape(java.awt.geom.RectangularShape s) {
 		_shapeId = CustomShape._shapeIdCounter;
 		_shape = s;
@@ -95,8 +104,9 @@ abstract public class CustomShape {
 
 	public void drawShape(Graphics2D g2d, ICamera camera, Transform t){
 	
+		AffineTransform old = g2d.getTransform();
 		g2d.translate(t.getPos().x  + (getLockedOnScreen() == false ? camera.getTransform().getPos().x:0),t.getPos().y   + (getLockedOnScreen() == false ? camera.getTransform().getPos().y:0));
-		g2d.rotate(getBaseRotation() + t.getRot());
+		if(_lockedRotation == false) g2d.rotate(getBaseRotation() + t.getRot());
 		g2d.translate(getOffset().x, getOffset().y);
 		if(getFillColor() != null) {
 			g2d.setColor(getFillColor());
@@ -109,7 +119,9 @@ abstract public class CustomShape {
 			g2d.draw(_shape);
 		}
 		
+		
 		_shape.getBounds().x = (int)t.getPos().x;
 		_shape.getBounds().y = (int)t.getPos().y;
+		g2d.setTransform(old);
 	}
 }

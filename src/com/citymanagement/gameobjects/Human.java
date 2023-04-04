@@ -5,6 +5,7 @@ import java.util.Comparator;
 import com.citymanagement.gameobjects.Needs.Need;
 import com.customgraphicinterface.core.GameObject;
 import com.customgraphicinterface.geometry.Rectangle;
+import com.customgraphicinterface.geometry.Text;
 import com.customgraphicinterface.utilities.Vector2;
 
 public abstract class Human extends GameObject {
@@ -110,7 +111,8 @@ public abstract class Human extends GameObject {
 		_needs.addNeed("thirst",0, 200, 0.2f, ()->findNearestWaterSource(), ()->die());
 		_needs.addNeed("reproductiveUrge",100, 200, 0.2f, ()->findMate(),null);
 
-		setMesh(new Rectangle(HUMANHEIGHT,HUMANWIDTH, new Vector2(-HUMANWIDTH/2f,-HUMANHEIGHT/2f), 0f, BORDER_COLOR, BORDER_SIZE, color, false));
+		addMesh(new Rectangle(HUMANHEIGHT,HUMANWIDTH, new Vector2(-HUMANWIDTH/2f,-HUMANHEIGHT/2f), 0f, BORDER_COLOR, BORDER_SIZE, color, false, false));
+		addMesh(new Text("Alain",new Vector2(-15,-30), 15,0f,false, true));
 		getTransform().setPos(pos==null?new Vector2():pos);
 		setZIndex(ZINDEX);
 	}
@@ -185,13 +187,13 @@ public abstract class Human extends GameObject {
 
 	protected void interact() {
 		if(_interactionTimer > _interactionDuration){
-			getMesh().setFillColor(_colorSave);
+			getMesh(0).setFillColor(_colorSave);
 			_interactionTimer = 0;
 			_interaction = InteractionState.DONE;
 		}else{
-			if(getMesh().getFillColor() != Human.INTERACTION_COLOR) {
-				_colorSave = getMesh().getFillColor();
-				getMesh().setFillColor(Human.INTERACTION_COLOR);
+			if(getMesh(0).getFillColor() != Human.INTERACTION_COLOR) {
+				_colorSave = getMesh(0).getFillColor();
+				getMesh(0).setFillColor(Human.INTERACTION_COLOR);
 			}
 			_interactionTimer += Human.INTERATION_SPEED;
 			_interaction = InteractionState.STARTED;

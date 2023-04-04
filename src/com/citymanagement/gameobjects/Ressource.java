@@ -25,7 +25,7 @@ public class Ressource extends GameObject{
 
     public Ressource(RessourceType t, Vector2 pos){
         _type = t;
-        setMesh(new Circle(RADIUS, new Vector2(-RADIUS,-RADIUS),0f,_settings[t.ordinal()].fillColor,_settings[t.ordinal()].borderColor,_settings[t.ordinal()].borderSize,_settings[t.ordinal()].lockedOnScreen ));
+        addMesh(new Circle(RADIUS, new Vector2(-RADIUS,-RADIUS),0f,_settings[t.ordinal()].fillColor,_settings[t.ordinal()].borderColor,_settings[t.ordinal()].borderSize,_settings[t.ordinal()].lockedOnScreen ));
         getTransform().setPos(pos);
     }
 

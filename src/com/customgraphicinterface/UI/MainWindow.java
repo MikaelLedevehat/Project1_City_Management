@@ -37,10 +37,11 @@ public class MainWindow{
 	private MainWindow() {
 
 		createMainWindow();
+		initializeTimer();
 		createCanvas();
 		createKeyBoardListener();
-		_updateChannel = EventManager.getInstance().createChannel("update");
-		initialize();
+		createUpdateChannel();
+		initializeLookAndFeel();
 	}
 
 	private void createKeyBoardListener() {
@@ -77,7 +78,7 @@ public class MainWindow{
 		}
 	}
 
-	private void initialize() {
+	private void initializeLookAndFeel() {
 		
 		try {
 			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -115,7 +116,13 @@ public class MainWindow{
 				System.exit(0);
 			}
 		});
+	}
 
+	private void createUpdateChannel(){
+		_updateChannel = EventManager.getInstance().createChannel("update");
+	}
+
+	private void initializeTimer(){
 		timer = new Timer(16, new ActionListener() {
 
 			@Override
