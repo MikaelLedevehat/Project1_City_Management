@@ -13,7 +13,7 @@ public class HumanFemale extends Human {
 
     private boolean _isPregnant = false;
 
-    public HumanFemale(HumanPopulation pop, Vector2 pos, Color color) {
+    public HumanFemale(IPopulation<Human> pop, Vector2 pos, Color color) {
         super(pop, SexType.FEMALE, pos, color);
     }
 

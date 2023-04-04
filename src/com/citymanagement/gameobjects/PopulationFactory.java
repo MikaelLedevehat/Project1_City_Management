@@ -1,7 +1,12 @@
 package com.citymanagement.gameobjects;
 
 import java.awt.Color;
+
+import com.customgraphicinterface.core.GameObject;
 import com.customgraphicinterface.utilities.Vector2;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 public class PopulationFactory {
 
@@ -10,26 +15,53 @@ public class PopulationFactory {
         DEFUALT_FEMALE,
     }
 
+    public enum RessourceType {
+        FOOD,
+    }
+
+    
+
+
     public static final int OPTIONS_LENGHT = 4;
 
     private PopulationFactory(){}
 
-    public static IPopulation createHumanPopulation(int number, Object... options){
-        IPopulation p = new HumanPopulation();
+    public static IPopulation<? extends GameObject> createRessourcePopulation(int number, Object... options){
+        IPopulation<? extends GameObject> p = Population.builder(Ressource.class);
 
-        fillPopulation(p,number, options);
+        //fillPopulation(p,Human.class,RessourceType.values(),number, options);
 
         return p;
     }
 
-    private static void fillPopulation(IPopulation p, int n, Object... options){
+    public static IPopulation<? extends GameObject> createHumanPopulation(int number, Object... options){
+        IPopulation<? extends GameObject> p = Population.builder(Human.class);
+
+        try {
+            fillPopulation(p,Human.class,HumanType.values(),number, options);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+
+        return p;
+    }
+
+    private static void fillPopulation(IPopulation<? extends GameObject> p, Class<? extends GameObject> c, Enum<? extends Object>[] values , int n, Object... options)
+    throws NoSuchMethodException, InvocationTargetException, IllegalAccessException{
         for(int i=0;i<n;i++){
             HumanType t = HumanType.values()[(int)Math.round(Math.random())];
-            p.addToPopulation(getHuman((HumanPopulation)p,t,options));
+            //Human h = getHuman((IPopulation<Human>)p,t,options);
+
+            Method method = PopulationFactory.class.getMethod("get"+c.getSimpleName(), IPopulation.class, HumanType.class, Object[].class);
+            
+            GameObject g = (GameObject)method.invoke(null, p,t,options);
+            ((IPopulation<? super GameObject>)p).addToPopulation(g);
         }
     }
 
-    public static Human getHuman(HumanPopulation p, HumanType t, Object... options){
+    @SuppressWarnings("unused")
+    public static Human getHuman(IPopulation<Human> p, HumanType t, Object... options){
         Human g = null;
         Vector2 pos = null;
         int width = 0;
@@ -45,9 +77,8 @@ public class PopulationFactory {
             width = (int)(o[1]!=null?o[1]:0);
             height = (int)(o[2]!=null?o[2]:0);
             color = (Color)(o[3]!=null?o[3]:null);
-        } catch (Exception e) {
-            System.err.println("GameObject options are invalid: " + e);
-            return null;
+        } catch (RuntimeException e) {
+            throw new NullPointerException("The options for creating this game object (Human) are invalid!");
         }
 
         switch (t){

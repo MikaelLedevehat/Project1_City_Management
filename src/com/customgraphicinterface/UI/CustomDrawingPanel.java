@@ -3,44 +3,38 @@ package com.customgraphicinterface.UI;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseAdapter;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
 import com.customgraphicinterface.pubsub.EventManager;
+import com.customgraphicinterface.pubsub.EventManager.Channel;
 import com.customgraphicinterface.pubsub.ISubsciber;
 
 import java.awt.geom.AffineTransform;
 import java.awt.Graphics2D;
 
 public class CustomDrawingPanel extends JPanel{
-	
-	private static final long serialVersionUID = 1L;
-	
-	private static Camera _mainCamera;
+	private ICamera _mainCamera;
+	private Channel _drawChannel;
 
 	public CustomDrawingPanel() {
         setBorder(BorderFactory.createLineBorder(Color.black));
-        setMouseEvents();
-        
-		_mainCamera = new Camera();
-		addMouseListener(_mainCamera);
-		addMouseMotionListener(_mainCamera);
+        createCamera();
+		createDrawChannel();
     }
-	
-	private void setMouseEvents() {
-		 addMouseListener(new MouseAdapter() {
-	            public void mousePressed(MouseEvent e) {
-	                //moveSquare(e.getX(),e.getY());
-	            }
-	        });
 
-	        addMouseMotionListener(new MouseAdapter() {
-	            public void mouseDragged(MouseEvent e) {
-	                //moveSquare(e.getX(),e.getY());
-	            }
-	        });
+	private void createDrawChannel(){
+		_drawChannel = EventManager.getInstance().createChannel("draw");
+		if(_drawChannel == null) 
+			throw new NullPointerException("Can't create 'draw' channel!");
+	}
+
+	private void createCamera(){
+		_mainCamera = new Camera();
+		if(_mainCamera == null)
+			throw new NullPointerException("Camera is null!");
+
+		_mainCamera.bindCameraToCanvas(this);
 	}
 
     public Dimension getPreferredSize() {
@@ -53,21 +47,14 @@ public class CustomDrawingPanel extends JPanel{
 
 		Graphics2D g2d = (Graphics2D)g;
 		
-		
-		Camera camera = CustomDrawingPanel.getMainCamera();
-		if(camera == null) {
-			System.err.println("Error : Camera is null");
-			return;
-		}
-
-        for (ISubsciber e : EventManager.getInstance().getChannel("draw")) {
+        for (ISubsciber e : _drawChannel.subs) {
 			AffineTransform old = g2d.getTransform();
-			e.onEventRecieved("draw",g2d, camera);
+			e.onEventRecieved(_drawChannel.name, g2d, _mainCamera);
 			g2d.setTransform(old);
 		}
     }
 
-	public static Camera getMainCamera() {
+	public ICamera getMainCamera() {
 		return _mainCamera;
 	}
 }

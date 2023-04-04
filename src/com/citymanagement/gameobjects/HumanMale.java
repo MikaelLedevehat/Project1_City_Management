@@ -16,7 +16,7 @@ public class HumanMale extends Human {
         return _attractivness;
     }
 
-    public HumanMale(HumanPopulation pop, Vector2 pos, Color color, float attractivness) {
+    public HumanMale(IPopulation<Human> pop, Vector2 pos, Color color, float attractivness) {
         super(pop, SexType.MALE,pos, color);
 
         this._attractivness = attractivness;
@@ -53,7 +53,6 @@ public class HumanMale extends Human {
             setGoal(()->reproduce(),100);
             setCurrentPartner(f);
             setDestination(f);
-            
         }
     }
 

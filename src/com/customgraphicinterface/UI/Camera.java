@@ -2,25 +2,25 @@ package com.customgraphicinterface.UI;
 
 import java.awt.event.MouseEvent;
 
+import javax.swing.JPanel;
 import javax.swing.event.MouseInputAdapter;
 
+import com.customgraphicinterface.core.Transform;
 import com.customgraphicinterface.utilities.Vector2;
 
-public class Camera extends MouseInputAdapter {
-	private Vector2 _pos = new Vector2();
+public class Camera extends MouseInputAdapter implements ICamera{
+	//private Vector2 _pos = new Vector2();
+	private final Transform _transform;
 	private Vector2 _lastDragPos = new Vector2();
 	private Vector2 _currentDragPos = new Vector2();
 	
-	public Vector2 getPos() {
-		return _pos;
+	@Override
+	public Transform getTransform(){
+		return _transform;
 	}
-	public void setPos(Vector2 pos) {
-		_pos.x = pos.x;
-		_pos.y = pos.y;
-	}
-	
+
 	public Camera(Vector2 pos) {
-		setPos(pos);
+		_transform = new Transform(pos,0f,new Vector2(1,1));
 	}
 	
 	public Camera(int x, int y) {
@@ -45,9 +45,16 @@ public class Camera extends MouseInputAdapter {
 		//System.out.println("Yap");
 	}
 	
+	@Override
 	public void update() {
 		Vector2 drif = _currentDragPos.minus(_lastDragPos);
-		_pos = _pos.plus(drif);
+		_transform.setPos(_transform.getPos().plus(drif));
 		_lastDragPos = _currentDragPos.clone();
+	}
+
+	@Override
+	public void bindCameraToCanvas(JPanel c) {
+		c.addMouseListener(this);
+		c.addMouseMotionListener(this);
 	}
 }

@@ -4,10 +4,11 @@ import java.awt.Graphics2D;
 
 import com.customgraphicinterface.UI.Camera;
 import com.customgraphicinterface.geometry.CustomShape;
+import com.customgraphicinterface.pubsub.EventManager;
 import com.customgraphicinterface.pubsub.ISubsciber;
 import com.customgraphicinterface.utilities.Vector2;
 
-public abstract class GameObject implements ISubsciber{
+public abstract class GameObject implements ISubsciber, ITransformable{
 
 	private static int _gameObjectIdCounter = 0;
 	private long _gameObjectId;
@@ -23,6 +24,7 @@ public abstract class GameObject implements ISubsciber{
 		_zIndex = z;
 	}
 	
+	@Override
 	public Transform getTransform(){
 		return _transform;
 	}
@@ -41,8 +43,8 @@ public abstract class GameObject implements ISubsciber{
 		_gameObjectId = GameObject._gameObjectIdCounter;
 		GameObject._gameObjectIdCounter ++;
 
-		subscribe("update");
-		subscribe("draw");
+		EventManager.getInstance().subscribe("update",this);
+		EventManager.getInstance().subscribe("draw",this);
 	}
 	
 	public long getId() {
@@ -50,8 +52,8 @@ public abstract class GameObject implements ISubsciber{
 	}
 
 	public void destroy(){
-		unsubscribe("update");
-		unsubscribe("draw");
+		EventManager.getInstance().unsubscribe("update", this);
+		EventManager.getInstance().unsubscribe("draw", this);
 
 		_meshObject.destroy();
 	}

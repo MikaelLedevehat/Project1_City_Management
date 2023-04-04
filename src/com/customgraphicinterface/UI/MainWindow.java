@@ -8,6 +8,7 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import com.customgraphicinterface.pubsub.EventManager;
+import com.customgraphicinterface.pubsub.EventManager.Channel;
 
 import java.awt.event.WindowEvent;
 
@@ -18,6 +19,7 @@ public class MainWindow{
 	private JFrame windowFrame;
 	private static CustomDrawingPanel canvas;
 	private Timer timer;
+	private Channel _updateChannel;
 
 	public static MainWindow getInstance() {
 		if (mwInstance == null) {
@@ -37,6 +39,7 @@ public class MainWindow{
 		createMainWindow();
 		createCanvas();
 		createKeyBoardListener();
+		_updateChannel = EventManager.getInstance().createChannel("update");
 		initialize();
 	}
 
@@ -118,9 +121,9 @@ public class MainWindow{
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				
-				CustomDrawingPanel.getMainCamera().update();
+				canvas.getMainCamera().update();
 				
-				EventManager.getInstance().notifyChanel("update");
+				_updateChannel.sendNotification();
 
 				canvas.repaint();
 			}

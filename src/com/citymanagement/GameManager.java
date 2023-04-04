@@ -11,7 +11,8 @@ public final class GameManager{
 
 	public GameManager() {
 		w = new World();
-		w.addPopulation(PopulationFactory.createHumanPopulation(20, new Vector2(500, 500)));
+		w.addPopulation(PopulationFactory.createHumanPopulation(2, new Vector2(500, 500)));
+		//w.addPopulation(PopulationFactory.createRessourcePopulation(20, new Vector2(500, 500)));
 	}
 	
 }

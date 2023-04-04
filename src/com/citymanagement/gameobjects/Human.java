@@ -49,7 +49,7 @@ public abstract class Human extends GameObject {
 	public static final float SPEED = 3f;
 	public static final float INTERATION_SPEED = 1f;
 
-	public final HumanPopulation population;
+	public final IPopulation<Human> population;
 
 	private SexType _sex;
 	private final Destination _dest;
@@ -101,7 +101,7 @@ public abstract class Human extends GameObject {
 		_sex = t;
 	}
 
-	public Human(HumanPopulation pop, SexType sex, Vector2 pos, Color color) {
+	public Human(IPopulation<Human> pop, SexType sex, Vector2 pos, Color color) {
 		this.population = pop;
 		_sex = sex;
 		_dest = new Destination();

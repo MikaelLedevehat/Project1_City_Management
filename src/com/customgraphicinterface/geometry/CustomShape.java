@@ -1,7 +1,8 @@
 package com.customgraphicinterface.geometry;
+
 import java.awt.Graphics2D;
 
-import com.customgraphicinterface.UI.Camera;
+import com.customgraphicinterface.UI.ICamera;
 import com.customgraphicinterface.core.Transform;
 import com.customgraphicinterface.utilities.Vector2;
 
@@ -92,9 +93,9 @@ abstract public class CustomShape {
 	public void destroy(){
 	}
 
-	public void drawShape(Graphics2D g2d, Camera camera, Transform t){
+	public void drawShape(Graphics2D g2d, ICamera camera, Transform t){
 	
-		g2d.translate(t.getPos().x  + (getLockedOnScreen() == false ? camera.getPos().x:0),t.getPos().y   + (getLockedOnScreen() == false ? camera.getPos().y:0));
+		g2d.translate(t.getPos().x  + (getLockedOnScreen() == false ? camera.getTransform().getPos().x:0),t.getPos().y   + (getLockedOnScreen() == false ? camera.getTransform().getPos().y:0));
 		g2d.rotate(getBaseRotation() + t.getRot());
 		g2d.translate(getOffset().x, getOffset().y);
 		if(getFillColor() != null) {

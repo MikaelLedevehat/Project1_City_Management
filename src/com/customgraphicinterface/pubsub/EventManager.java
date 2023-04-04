@@ -7,8 +7,34 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 public class EventManager {
 
+    public class ChannelAlreadyCreatedException extends RuntimeException{
+        public ChannelAlreadyCreatedException(String errorMessage, Throwable err) {
+            super(errorMessage, err);
+        }
+        public ChannelAlreadyCreatedException(String errorMessage) {
+            super(errorMessage);
+        }
+    }
+
+    public class Channel{
+        public final Set<ISubsciber> subs;
+        public final String name;
+
+        private Channel(Set<ISubsciber> s, String n){
+            subs = s;
+            name = n;
+        }
+
+        public void sendNotification(Object... payload){
+            if(subs == null) return;
+            for (ISubsciber e : subs) {
+                e.onEventRecieved(name, payload);
+            }
+        }
+    }
+
     private static EventManager _em;
-    private Map<String, Set<ISubsciber>> _channels;
+    private Map<String, Channel> _channels;
 
     public static EventManager getInstance(){
         if(_em == null){
@@ -24,62 +50,61 @@ public class EventManager {
     }
 
     private EventManager(){
-        _channels = new ConcurrentHashMap<String, Set<ISubsciber>>();
+        _channels = new ConcurrentHashMap<String, Channel>();
     }
 
-    public boolean subscribe (String channelName, ISubsciber sub){
-        if(channelName == null) throw new NullPointerException("Channel name can't be null!");
-        if(sub == null) throw new NullPointerException("Subscriber can't be null!");
-
-        Set<ISubsciber> channel = _channels.get(channelName);
+    public Channel createChannel(String channelName){
+        Channel channel = _channels.get(channelName);
 
 		if (channel == null)
 		{
 			synchronized (_channels)
 			{
-				if ((channel = _channels.get(channelName)) == null)
+                channel = _channels.get(channelName);
+				if (channel == null)
 				{
-					channel = new CopyOnWriteArraySet<ISubsciber>();
+					Set<ISubsciber> s = new CopyOnWriteArraySet<ISubsciber>();
+                    channel = new Channel(s, channelName);
 					_channels.put(channelName, channel);
+                    return channel;
 				}
+                else throw new ChannelAlreadyCreatedException(channelName);
 			}
-		}
-		return channel.add(sub);
+		}else throw new ChannelAlreadyCreatedException(channelName);
     }
 
-    public boolean unsubscribe(String channelName, ISubsciber sub){
-        if(channelName == null) throw new NullPointerException("Channel name can't be null!");
+    public void subscribe (String channelName, ISubsciber sub){
         if(sub == null) throw new NullPointerException("Subscriber can't be null!");
-
-        Set<ISubsciber> channel = _channels.get(channelName);
-
-        if (channel == null) return false;
-
-		return channel.remove(sub);
+        Channel channel = getChannel(channelName);
+		channel.subs.add(sub);
     }
 
-    public Set<ISubsciber> getChannel(String chanelName){
-        return _channels.get(chanelName);
+    public void unsubscribe(String channelName, ISubsciber sub){
+        
+        if(sub == null) throw new NullPointerException("Subscriber can't be null!");
+        Channel channel = getChannel(channelName);
+		channel.subs.remove(sub);
     }
 
-    public void notifyChanel(String channelName, Object... payload){
-        Set<ISubsciber> subs = EventManager.getInstance().getChannel(channelName);
-        if(subs == null) return;
-        for (ISubsciber e : EventManager.getInstance().getChannel(channelName)) {
-			e.onEventRecieved(channelName, payload);
-		}
+    protected Channel getChannel(String channelName){
+        if(channelName == null) throw new NullPointerException("Channel name can't be null!");
+        Channel channel = _channels.get(channelName);
+        if (channel == null) throw new NullPointerException("the channel '"+ channelName +"' does not exist");
+        return channel;
     }
 
     public boolean deleteChannel(String channelName){
         if(channelName == null) throw new NullPointerException("Channel name can't be null!");
         
-        Set<ISubsciber> channel = _channels.get(channelName);
+        Channel channel = _channels.get(channelName);
 
         if (channel == null) return false;
 
-        for(ISubsciber e : channel) {
+        for(ISubsciber e : channel.subs) {
             this.unsubscribe(channelName, e);
         }
+
+        _channels.remove(channelName);
 
         return true;
     }
