@@ -6,6 +6,6 @@ public interface IWorld {
     
     public Transform getTransform();
     public boolean addPopulation(IPopulation<? extends GameObject> p);
-    public IPopulation<? extends GameObject> getPopulation(Class<? extends IPopulation<? extends GameObject>> type);
+    public IPopulation<? extends GameObject> getPopulation(Class<? extends GameObject> type);
     public boolean removePopulation(Class<? extends IPopulation<? extends GameObject>> type);
 }

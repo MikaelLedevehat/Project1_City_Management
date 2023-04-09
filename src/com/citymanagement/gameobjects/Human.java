@@ -210,6 +210,12 @@ public abstract class Human extends GameObject {
 
 	protected void findNearestWaterSource(){
 		Vector2 nearestSource = null;
+		IWorld w =  this.population.getWorld();
+		if(w == null) return;
+
+		IPopulation<? extends GameObject> p = w.getPopulation(Ressource.class);
+		System.out.println(p);
+
 		/*for(Terrain t : world.getWaterSources()){
 			if(nearestSource == null) nearestSource = t.getTransform().pos;
 			else if(Vector2.dist(getTransform().pos, nearestSource) > Vector2.dist(getTransform().pos, t.getTransform().pos)) nearestSource = t.getTransform().pos;

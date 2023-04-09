@@ -13,4 +13,6 @@ public interface IPopulation<T extends GameObject> {
     public T getMember(int index);
     public T getMember(T g);
     public void mergePopulation(IPopulation<T> v2);
+    public IWorld getWorld();
+	public void setWorld(IWorld w);
 }

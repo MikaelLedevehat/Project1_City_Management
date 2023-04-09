@@ -25,14 +25,14 @@ public class World implements IWorld {
     public boolean addPopulation(IPopulation<? extends GameObject> p) {
 
         IPopulation<? extends GameObject> oldP = _populationList.get(p.getPopulationType());
-        if(oldP == null) _populationList.put((Class<? extends GameObject>)p.getClass(), p);
+        if(oldP == null) _populationList.put(p.getPopulationType(), p);
         else _populationList.merge((Class<? extends GameObject>) p.getClass(), p, (v1,v2)-> {((IPopulation<GameObject>)v1).mergePopulation((IPopulation<GameObject>) v2); return v1;} );
-
+        p.setWorld(this);
         return true;
     }
 
     @Override
-    public IPopulation<? extends GameObject> getPopulation(Class<? extends IPopulation<? extends GameObject>> type) {
+    public IPopulation<? extends GameObject> getPopulation(Class<? extends GameObject> type) {
         return _populationList.get(type);
     }
 

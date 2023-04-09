@@ -8,10 +8,19 @@ public class Population<T extends GameObject> implements IPopulation<T>{
 
     private final ArrayList<T> _population;
 	private final Class<? extends GameObject> _memberType;
+	private IWorld _world;
 
 	public static <T extends GameObject> Population<T> builder(Class<T> type) {
 		return new Population<T>(type);
 	} 
+
+	public IWorld getWorld(){
+		return _world;
+	}
+
+	public void setWorld(IWorld w){
+		_world = w;
+	}
 
 	@Override
 	public ArrayList<T> getPopulationList(){
