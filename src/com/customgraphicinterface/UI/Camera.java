@@ -1,8 +1,6 @@
 package com.customgraphicinterface.UI;
 
 import java.awt.event.MouseEvent;
-
-import javax.swing.JPanel;
 import javax.swing.event.MouseInputAdapter;
 
 import com.customgraphicinterface.core.Transform;
@@ -53,8 +51,8 @@ public class Camera extends MouseInputAdapter implements ICamera{
 	}
 
 	@Override
-	public void bindCameraToCanvas(JPanel c) {
-		c.addMouseListener(this);
-		c.addMouseMotionListener(this);
+	public void bindCameraToCanvas(ICanvas c) {
+		c.getCanvasComponent().addMouseListener(this);
+		c.getCanvasComponent().addMouseMotionListener(this);
 	}
 }

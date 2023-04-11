@@ -1,6 +1,7 @@
 package com.customgraphicinterface.UI;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import javax.swing.BorderFactory;
@@ -8,23 +9,20 @@ import javax.swing.JPanel;
 
 import com.customgraphicinterface.pubsub.EventManager;
 import com.customgraphicinterface.pubsub.EventManager.Channel;
-import com.customgraphicinterface.pubsub.ISubsciber;
 import java.awt.Graphics2D;
 
-public class CustomDrawingPanel extends JPanel{
+public class CustomDrawingPanel extends JPanel implements ICanvas{
 	private ICamera _mainCamera;
 	private Channel _drawChannel;
 
 	public CustomDrawingPanel() {
         setBorder(BorderFactory.createLineBorder(Color.black));
         createCamera();
-		createDrawChannel();
+		getDrawChannel();
     }
 
-	private void createDrawChannel(){
-		_drawChannel = EventManager.getInstance().createChannel("draw");
-		if(_drawChannel == null) 
-			throw new NullPointerException("Can't create 'draw' channel!");
+	private void getDrawChannel(){
+		_drawChannel = EventManager.getInstance().accessChannel("draw");
 	}
 
 	private void createCamera(){
@@ -35,6 +33,7 @@ public class CustomDrawingPanel extends JPanel{
 		_mainCamera.bindCameraToCanvas(this);
 	}
 
+	@Override
     public Dimension getPreferredSize() {
         return new Dimension(1400,800);
     }
@@ -42,17 +41,18 @@ public class CustomDrawingPanel extends JPanel{
 	@Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-
+		_mainCamera.update();
 		Graphics2D g2d = (Graphics2D)g;
-		
-        for (ISubsciber e : _drawChannel.subs) {
-			
-			e.onEventRecieved(_drawChannel.name, g2d, _mainCamera);
-			
-		}
+		_drawChannel.sendNotification(g2d, _mainCamera);
     }
 
+	@Override
 	public ICamera getMainCamera() {
 		return _mainCamera;
+	}
+
+	@Override
+	public Component getCanvasComponent() {
+		return this;
 	}
 }

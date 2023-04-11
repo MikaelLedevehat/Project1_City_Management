@@ -214,7 +214,7 @@ public abstract class Human extends GameObject {
 		if(w == null) return;
 
 		IPopulation<? extends GameObject> p = w.getPopulation(Ressource.class);
-		System.out.println(p);
+		//System.out.println(p);
 
 		/*for(Terrain t : world.getWaterSources()){
 			if(nearestSource == null) nearestSource = t.getTransform().pos;

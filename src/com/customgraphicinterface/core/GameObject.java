@@ -35,12 +35,14 @@ public abstract class GameObject implements ISubsciber, ITransformable{
 	}
 	
 	protected void addMesh(CustomShape s){
+		if(_meshObjects.size() == 0) EventManager.getInstance().subscribe("draw",this);
 		_meshObjects.add(s);
 	}
 
 	protected void removeMesh(int index){
 		CustomShape c = _meshObjects.remove(index);
 		if(c!=null) c.destroy();
+		if(_meshObjects.size() == 0) EventManager.getInstance().unsubscribe("draw",this);
 	}
 
 	protected void removeMesh(CustomShape s){
@@ -62,7 +64,7 @@ public abstract class GameObject implements ISubsciber, ITransformable{
 		GameObject._gameObjectIdCounter ++;
 
 		EventManager.getInstance().subscribe("update",this);
-		EventManager.getInstance().subscribe("draw",this);
+		
 	}
 	
 	public long getId() {
@@ -71,16 +73,16 @@ public abstract class GameObject implements ISubsciber, ITransformable{
 
 	public void destroy(){
 		EventManager.getInstance().unsubscribe("update", this);
-		EventManager.getInstance().unsubscribe("draw", this);
-
 		destroyMeshes();
 	}
 
 	@Override
 	public void onEventRecieved(String type, Object... payload){
-		if(type.equals("update")) update();
+		if(type.equals("update"))
+			update();
 		else if(type.equals("draw")){
-			if(payload.length != 2) throw new IllegalArgumentException("Draw call arguments numbers incorrects! ");
+			if(payload.length != 2) 
+				throw new IllegalArgumentException("Draw call arguments numbers incorrects! ");
 			draw((Graphics2D)payload[0],(Camera)payload[1]);
 		}
 	}

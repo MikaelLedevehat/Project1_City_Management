@@ -1,25 +1,18 @@
 package com.customgraphicinterface.UI;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import javax.swing.JFrame;
-import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import com.customgraphicinterface.pubsub.EventManager;
-import com.customgraphicinterface.pubsub.EventManager.Channel;
-
 import java.awt.event.WindowEvent;
 
-public class MainWindow{
+public class MainWindow implements IWindow{
 
 	private static MainWindow mwInstance;
 
 	private JFrame windowFrame;
-	private static CustomDrawingPanel canvas;
-	private Timer timer;
-	private Channel _updateChannel;
+	private static ICanvas canvas;
+
 
 	public static MainWindow getInstance() {
 		if (mwInstance == null) {
@@ -30,17 +23,15 @@ public class MainWindow{
 		}
 	}
 
-	public static CustomDrawingPanel getMainCanvas() {
+	public static ICanvas getMainCanvas() {
 		return canvas;
 	}
 
 	private MainWindow() {
 
 		createMainWindow();
-		initializeTimer();
 		createCanvas();
 		createKeyBoardListener();
-		createUpdateChannel();
 		initializeLookAndFeel();
 	}
 
@@ -73,7 +64,6 @@ public class MainWindow{
 		try {
 			show();
 		} catch (Exception e) {
-			stopLoop();
 			e.printStackTrace();
 		}
 	}
@@ -85,17 +75,6 @@ public class MainWindow{
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
 			ex.printStackTrace();
 		}
-	}
-
-	public void stopLoop() {
-		if(timer != null) timer.stop();
-	}
-	
-	private void startLoop() {
-		if (timer == null)
-			return;
-		timer.setInitialDelay(0);
-		timer.start();
 	}
 
 	public void setSize(int h, int l){
@@ -111,45 +90,23 @@ public class MainWindow{
 		windowFrame.addWindowListener(new java.awt.event.WindowAdapter() {
 			@Override
 			public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-				if (timer != null)
-					timer.stop();
 				System.exit(0);
 			}
 		});
 	}
 
-	private void createUpdateChannel(){
-		_updateChannel = EventManager.getInstance().createChannel("update");
-	}
-
-	private void initializeTimer(){
-		timer = new Timer(16, new ActionListener() {
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				
-				canvas.getMainCamera().update();
-				
-				_updateChannel.sendNotification();
-
-				canvas.repaint();
-			}
-		});
-	}
-
 	private void createCanvas() {
-		
 		canvas = new CustomDrawingPanel();
 		if (windowFrame != null)
-			windowFrame.add(canvas);
+			windowFrame.add(canvas.getCanvasComponent());
 		else {
-			throw new NullPointerException("Error: WindowFrame not initialised");
+			throw new NullPointerException("Error: Canvas not initialised");
 		}
 		windowFrame.pack();
 	}
 
 	public void show() {
-		startLoop();
+		//startLoop();
 		windowFrame.setVisible(true);
 	}
 

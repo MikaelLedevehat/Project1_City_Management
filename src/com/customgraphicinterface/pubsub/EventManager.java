@@ -16,13 +16,24 @@ public class EventManager {
         }
     }
 
+    public class PrivateChannelException extends RuntimeException{
+        public PrivateChannelException(String errorMessage, Throwable err) {
+            super(errorMessage, err);
+        }
+        public PrivateChannelException(String errorMessage) {
+            super(errorMessage);
+        }
+    }
+
     public class Channel{
         public final Set<ISubsciber> subs;
         public final String name;
+        public final boolean isPublic;
 
-        private Channel(Set<ISubsciber> s, String n){
+        private Channel(Set<ISubsciber> s, String n, boolean p){
             subs = s;
             name = n;
+            isPublic = p;
         }
 
         public void sendNotification(Object... payload){
@@ -53,7 +64,13 @@ public class EventManager {
         _channels = new ConcurrentHashMap<String, Channel>();
     }
 
-    public Channel createChannel(String channelName){
+    public Channel accessChannel(String name){
+        Channel c = getChannel(name);
+        if(c.isPublic == false) throw new PrivateChannelException("The channel '" + name + "' is private!");
+        else return c;
+    }
+
+    public Channel createChannel(String channelName, boolean isPublic){
         Channel channel = _channels.get(channelName);
 
 		if (channel == null)
@@ -64,7 +81,7 @@ public class EventManager {
 				if (channel == null)
 				{
 					Set<ISubsciber> s = new CopyOnWriteArraySet<ISubsciber>();
-                    channel = new Channel(s, channelName);
+                    channel = new Channel(s, channelName,isPublic);
 					_channels.put(channelName, channel);
                     return channel;
 				}
@@ -83,7 +100,7 @@ public class EventManager {
         
         if(sub == null) throw new NullPointerException("Subscriber can't be null!");
         Channel channel = getChannel(channelName);
-		channel.subs.remove(sub);
+		if(channel != null) channel.subs.remove(sub);
     }
 
     protected Channel getChannel(String channelName){

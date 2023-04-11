@@ -1,21 +1,18 @@
 package com.citymanagement;
 
-import javax.swing.SwingUtilities;
-
+import com.customgraphicinterface.UI.GameLoop;
 import com.customgraphicinterface.UI.MainWindow;
 
 public class Launcher{
 
 	public static void main(String[] args) {
 
-		SwingUtilities.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				MainWindow mainWindow = MainWindow.getInstance();
-				mainWindow.setSize(1500, 500);
-				GameManager gm = new GameManager();
-				mainWindow.run();
-			}
-		});
+		GameLoop g = new GameLoop();
+		MainWindow mainWindow = MainWindow.getInstance();
+		g.linkComponent(mainWindow.getMainCanvas().getCanvasComponent());
+		mainWindow.setSize(1500, 500);
+		GameManager gm = new GameManager();
+		mainWindow.run();
+		g.start();
 	}
 }
