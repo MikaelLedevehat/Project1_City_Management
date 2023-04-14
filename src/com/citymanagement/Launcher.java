@@ -1,18 +1,17 @@
 package com.citymanagement;
 
-import com.customgraphicinterface.UI.GameLoop;
-import com.customgraphicinterface.UI.MainWindow;
+import com.customgraphicinterface.UI.CustomWindow;
+import com.customgraphicinterface.UI.IWindow;
+import com.customgraphicinterface.core.GameLoop;
 
 public class Launcher{
 
 	public static void main(String[] args) {
 
 		GameLoop g = new GameLoop();
-		MainWindow mainWindow = MainWindow.getInstance();
-		g.linkComponent(mainWindow.getMainCanvas().getCanvasComponent());
-		mainWindow.setSize(1500, 500);
+		IWindow mainWindow = new CustomWindow(true);
+		g.linkComponent(mainWindow.getComponent());
 		GameManager gm = new GameManager();
-		mainWindow.run();
 		g.start();
 	}
 }
