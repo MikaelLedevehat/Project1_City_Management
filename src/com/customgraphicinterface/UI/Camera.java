@@ -52,7 +52,7 @@ public class Camera extends MouseInputAdapter implements ICamera{
 
 	@Override
 	public void bindCameraToCanvas(ICanvas c) {
-		c.getCanvasComponent().addMouseListener(this);
-		c.getCanvasComponent().addMouseMotionListener(this);
+		c.getComponent().addMouseListener(this);
+		c.getComponent().addMouseMotionListener(this);
 	}
 }

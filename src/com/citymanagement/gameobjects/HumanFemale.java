@@ -1,8 +1,6 @@
 package com.citymanagement.gameobjects;
 
 import java.awt.Color;
-
-import com.citymanagement.gameobjects.PopulationFactory.HumanType;
 import com.customgraphicinterface.utilities.Vector2;
 
 public class HumanFemale extends Human {
@@ -19,9 +17,10 @@ public class HumanFemale extends Human {
 
     private void birth(){
         int r = (int)(Math.random() * 2);
-		population.addToPopulation(PopulationFactory.getHuman(population, HumanType.values()[r], this.getTransform().getPos()));
+		population.addToPopulation(HumanFactory.getInstance().make(population));
         this.getMesh(0).setFillColor(DEFAULT_COLOR);
         this.getNeeds().removeNeed("birth");
+        _isPregnant = false;
     }
 
     private void gestate(){

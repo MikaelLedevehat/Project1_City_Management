@@ -39,20 +39,17 @@ public abstract class GameObject implements ISubsciber, ITransformable{
 		_meshObjects.add(s);
 	}
 
-	protected void removeMesh(int index){
-		CustomShape c = _meshObjects.remove(index);
-		if(c!=null) c.destroy();
+	protected void removeMesh(CustomShape s){
+		if(s == null) return;
+		_meshObjects.remove(s);
+		s.destroy();
 		if(_meshObjects.size() == 0) EventManager.getInstance().unsubscribe("draw",this);
 	}
 
-	protected void removeMesh(CustomShape s){
-		_meshObjects.remove(s);
-		s.destroy();
-	}
-
 	private void destroyMeshes(){
-		for(int i=0; i<_meshObjects.size();i++){
-			removeMesh(i);
+		CustomShape[] arr = _meshObjects.toArray(new CustomShape[_meshObjects.size()]);
+		for(int i=0; i<arr.length;i++){
+			removeMesh(arr[i]);
 		}
 	}
 

@@ -1,5 +1,5 @@
 package com.customgraphicinterface.UI;
 
-public interface IWindow {
+public interface IWindow extends IComponent{
 
 }

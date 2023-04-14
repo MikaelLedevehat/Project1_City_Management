@@ -1,8 +1,5 @@
 package com.customgraphicinterface.UI;
 
-import java.awt.Component;
-
-public interface ICanvas{
-    Component getCanvasComponent();
+public interface ICanvas extends IComponent{
     ICamera getMainCamera();
 }

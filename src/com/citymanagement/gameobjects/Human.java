@@ -2,6 +2,7 @@ package com.citymanagement.gameobjects;
 
 import java.awt.Color;
 import java.util.Comparator;
+
 import com.citymanagement.gameobjects.Needs.Need;
 import com.customgraphicinterface.core.GameObject;
 import com.customgraphicinterface.geometry.Rectangle;
@@ -41,6 +42,11 @@ public abstract class Human extends GameObject {
 		DONE;
 	}
 
+	private enum StatusState{
+		ALIVE,
+		DEAD,
+	}
+
 	public static final int HUMANHEIGHT = 10;
 	public static final int HUMANWIDTH = 10;
 	public static final int ZINDEX = 10;
@@ -59,8 +65,15 @@ public abstract class Human extends GameObject {
 	private float _interactionTimer = 0;
 	private InteractionState _interaction = InteractionState.NONE;
 	private Color _colorSave;
+	private final String _name;
 	private Human _currentPartner;
 	private int _interactionDuration = 0;
+	private StatusState _status = StatusState.ALIVE;
+
+
+	public String getName(){
+		return _name;
+	}
 
 	public void setDestination(Vector2 dest) {
 		_dest.pos = dest;
@@ -107,12 +120,18 @@ public abstract class Human extends GameObject {
 		_sex = sex;
 		_dest = new Destination();
 		_needs = new Needs();
+		_name = generateName();
+
 		_needs.addNeed("hunger",0, 200, 0.2f, ()->findNearestFood(), ()->die());
 		_needs.addNeed("thirst",0, 200, 0.2f, ()->findNearestWaterSource(), ()->die());
 		_needs.addNeed("reproductiveUrge",100, 200, 0.2f, ()->findMate(),null);
 
 		addMesh(new Rectangle(HUMANHEIGHT,HUMANWIDTH, new Vector2(-HUMANWIDTH/2f,-HUMANHEIGHT/2f), 0f, BORDER_COLOR, BORDER_SIZE, color, false, false));
-		addMesh(new Text("Alain",new Vector2(-15,-30), 15,0f,false, true));
+		addMesh(new Text(_name,new Vector2(-15,-30), 15,0f,false, true));
+		addMesh(new Rectangle(5, 50, new Vector2(-15,-50), 0f, Color.red, 0, Color.red, false, true));
+		addMesh(new Rectangle(5, 50, new Vector2(-15,-60), 0f, Color.red, 0, Color.red, false, true));
+		addMesh(new Rectangle(5, 50, new Vector2(-15,-70), 0f, Color.red, 0, Color.red, false, true));
+
 		getTransform().setPos(pos==null?new Vector2():pos);
 		setZIndex(ZINDEX);
 	}
@@ -120,6 +139,8 @@ public abstract class Human extends GameObject {
 	@Override
 	public void update() {
 		_needs.updateAllNeeds();
+		if(_status == StatusState.DEAD) return;
+		updateNeedsUI();
 		if( _dest.pos != null) {
 			if(arrived()){
 				if(_interaction != InteractionState.DONE && _interactionDuration > 0) interact();
@@ -135,6 +156,42 @@ public abstract class Human extends GameObject {
 		}else {
 			selectDestination();
 		}
+	}
+
+	public String generateName(){
+
+		final String lexicon = "abcdefghijklmnopqrstuvwxyz";
+		final java.util.Random rand = new java.util.Random();
+		StringBuilder builder = new StringBuilder();
+
+		while(builder.toString().length() == 0) {
+			int length = rand.nextInt(5)+5;
+			for(int i = 0; i < length; i++) {
+				builder.append(lexicon.charAt(rand.nextInt(lexicon.length())));
+			}
+		}
+		
+		return builder.toString().substring(0,1).toUpperCase() + builder.toString().substring(1);
+	}
+
+	private void updateNeedsUI() {
+		updateNeedUI("thirst", 2);
+		updateNeedUI("reproductiveUrge", 3);
+		updateNeedUI("hunger", 4);
+	}
+
+	private void updateNeedUI(String name, int meshIndex){
+		try {
+			Rectangle r = (Rectangle)this.getMesh(meshIndex);
+			float coef = getNeeds().getNeed(name).getMaxCap()/ 50;
+			r.setWidth((int)(getNeeds().getNeed(name).getCurrentValue()/coef));
+			float colorCoef = getNeeds().getNeed(name).getCurrentValue()/getNeeds().getNeed(name).getMaxCap();
+			r.setFillColor(new Color(colorCoef, 1-colorCoef, 0f));
+			r.setBorderColor(r.getFillColor());
+		} catch (Exception e) {
+			System.out.println("Can't update human need " + name +" UI!");
+		}
+		
 	}
 
 	protected void updateDestination() {
@@ -261,6 +318,7 @@ public abstract class Human extends GameObject {
 	}
 
 	protected void die(){
+		_status = StatusState.DEAD;
 		population.removeFromPopulation(this);
 		destroy();
 	}

@@ -35,7 +35,7 @@ public class CustomDrawingPanel extends JPanel implements ICanvas{
 
 	@Override
     public Dimension getPreferredSize() {
-        return new Dimension(1400,800);
+        return new Dimension(1300,700);
     }
 
 	@Override
@@ -52,7 +52,7 @@ public class CustomDrawingPanel extends JPanel implements ICanvas{
 	}
 
 	@Override
-	public Component getCanvasComponent() {
+	public Component getComponent() {
 		return this;
 	}
 }
