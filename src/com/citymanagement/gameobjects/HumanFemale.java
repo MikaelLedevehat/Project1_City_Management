@@ -1,3 +1,11 @@
+/*Copyright 2021 Google LLC
+*
+*Author: Mikael Le Devehat
+*Use of this source code is governed by an MIT-style
+*license that can be found in the LICENSE file or at
+https://opensource.org/licenses/MIT.
+*/
+
 package com.citymanagement.gameobjects;
 
 import java.awt.Color;
@@ -17,7 +25,7 @@ public class HumanFemale extends Human {
 
     private void birth(){
         int r = (int)(Math.random() * 2);
-		population.addToPopulation(HumanFactory.getInstance().make(population));
+		population.addToPopulation(HumanFactory.build().make(population));
         this.getMesh(0).setFillColor(DEFAULT_COLOR);
         this.getNeeds().removeNeed("birth");
         _isPregnant = false;

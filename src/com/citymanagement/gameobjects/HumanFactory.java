@@ -1,3 +1,11 @@
+/*Copyright 2021 Google LLC
+*
+*Author: Mikael Le Devehat
+*Use of this source code is governed by an MIT-style
+*license that can be found in the LICENSE file or at
+https://opensource.org/licenses/MIT.
+*/
+
 package com.citymanagement.gameobjects;
 
 import java.awt.Color;
@@ -12,12 +20,8 @@ public final class HumanFactory implements IFactory<Human>{
         DEFUALT_FEMALE,
     }
 
-    public static final int OPTIONS_LENGHT = 4;
-    private static HumanFactory hf;
-    
-
-    private HumanFactory(){
-
+    public static HumanFactory build(){
+        return new HumanFactory();
     }
 
     @SuppressWarnings("unchecked")
@@ -25,11 +29,7 @@ public final class HumanFactory implements IFactory<Human>{
     public Human make(Object... options) {
         Human g = null;
 
-        Class<?>[] c = new Class[]{
-            IPopulation.class, Vector2.class, HumanType.class, Color.class
-        };
-
-        Object[] o = IFactory.checkOptions(options, c);
+        Object[] o = checkOptions(options, new Class[]{IPopulation.class, Vector2.class, HumanType.class, Color.class});
 
         if(o[2] == null)
             o[2] = HumanType.values()[(int)(Math.random()*HumanType.values().length)];
@@ -45,17 +45,16 @@ public final class HumanFactory implements IFactory<Human>{
         return g;
     }
 
-    @Override
-    public IFactory<Human> getInstance() {
-        if(hf == null){
-            synchronized(hf){
-                if(hf == null){
-                    hf = new HumanFactory();
+    /*public static IFactory<Human> getInstance() {
+        if(_hf == null){
+            synchronized(_hf){
+                if(_hf == null){
+                    _hf = new HumanFactory();
                 }
             }
         }
         
-        return hf;
-    }
+        return _hf;
+    }*/
 
 }

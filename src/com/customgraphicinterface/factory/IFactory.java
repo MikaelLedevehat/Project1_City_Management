@@ -1,8 +1,16 @@
+/*Copyright 2021 Google LLC
+*
+*Author: Mikael Le Devehat
+*Use of this source code is governed by an MIT-style
+*license that can be found in the LICENSE file or at
+https://opensource.org/licenses/MIT.
+*/
+
 package com.customgraphicinterface.factory;
 
 public interface IFactory<T> {
 
-    public static Object[] checkOptions(Object[] optsArg, Class<?>[] optsRef){
+    public default Object[] checkOptions(Object[] optsArg, Class<?>[] optsRef){
         Object[] r = new Object[optsRef.length];
         try {
             int length = optsArg.length<optsRef.length?optsArg.length:optsRef.length;
@@ -15,16 +23,6 @@ public interface IFactory<T> {
         }
         
         return r;
-    }
-
-    public static <T> IFactory<T> getInstance(){
-        if(hf == null){
-            synchronized(hf){
-                if(hf == null){
-                    hf = new HumanFactory();
-                }
-            }
-        }
     }
 
     public T make(Object... options);

@@ -1,3 +1,11 @@
+/*Copyright 2021 Google LLC
+*
+*Author: Mikael Le Devehat
+*Use of this source code is governed by an MIT-style
+*license that can be found in the LICENSE file or at
+https://opensource.org/licenses/MIT.
+*/
+
 package com.citymanagement.gameobjects;
 
 import java.util.ArrayList;
@@ -10,7 +18,7 @@ public class Population<T extends GameObject> implements IPopulation<T>{
 	private final Class<? extends GameObject> _memberType;
 	private IWorld _world;
 
-	public static <T extends GameObject> Population<T> builder(Class<T> type) {
+	public static <T extends GameObject> IPopulation<T> build(Class<T> type) {
 		return new Population<T>(type);
 	} 
 
