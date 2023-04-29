@@ -17,6 +17,7 @@ import com.customgraphicinterface.pubsub.EventManager;
 import com.customgraphicinterface.pubsub.ISubsciber;
 import com.customgraphicinterface.utilities.Vector2;
 
+//TODO make mesh categories: main, and secondaries, so that main meshes that represent the object can be all modified with having to manually sort bewteen all the meshes
 public abstract class GameObject implements ISubsciber, ITransformable{
 
 	private static int _gameObjectIdCounter = 0;

@@ -1,11 +1,3 @@
-/*Copyright 2021 Google LLC
-*
-*Author: Mikael Le Devehat
-*Use of this source code is governed by an MIT-style
-*license that can be found in the LICENSE file or at
-https://opensource.org/licenses/MIT.
-*/
-
 package com.citymanagement.gameobjects;
 
 import java.awt.Color;
@@ -33,7 +25,7 @@ public class HumanMale extends Human {
     public Human sendAdvances(ArrayList<Human> lf){
         for(Human f : lf){
             if(((HumanFemale)f).receiveAdvance(this)){
-                setCurrentPartner(f);
+                setCurrentMate(f);
                 return f;
             }
         }
@@ -42,10 +34,9 @@ public class HumanMale extends Human {
     
 
     @Override
-    protected boolean reproduce() {
+    protected void reproduce() {
         getNeeds().getNeed("reproductiveUrge").setCurrentValue(0f);
-        setCurrentPartner(null);
-        return true;
+        setCurrentMate(null);
     }
 
     @Override
@@ -59,7 +50,7 @@ public class HumanMale extends Human {
 
         if(f != null){
             setGoal(()->reproduce(),100);
-            setCurrentPartner(f);
+            setCurrentMate(f);
             setDestination(f);
         }
     }

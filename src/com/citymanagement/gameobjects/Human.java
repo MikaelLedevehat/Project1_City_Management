@@ -1,11 +1,3 @@
-/*Copyright 2021 Google LLC
-*
-*Author: Mikael Le Devehat
-*Use of this source code is governed by an MIT-style
-*license that can be found in the LICENSE file or at
-https://opensource.org/licenses/MIT.
-*/
-
 package com.citymanagement.gameobjects;
 
 import java.awt.Color;
@@ -17,17 +9,33 @@ import com.customgraphicinterface.geometry.Rectangle;
 import com.customgraphicinterface.geometry.Text;
 import com.customgraphicinterface.utilities.Vector2;
 
+
 public abstract class Human extends GameObject {
 
+	/**
+	 * Contain the action to execute when the destination is reached.
+	 * exemple: the object (Human) execute "drink" when reaching the destination "water source".
+	 */
 	protected interface GoalExecute{
 		public void execute();
 	}
 
+
+	/**
+	 * Used to represent the destination of this object. Either a target is given, in that case the target position will be used,
+	 * or a direct position is given, in that case the target is null;
+	 * 
+	 * @param pos The position in space
+	 * @param target the target position
+	 */
 	public class Destination {
 		public Vector2 pos;
 		public GameObject target;
 	}
 
+	/**
+	 * Used to compare two Human between them by IDs
+	 */
 	public static class HumanComparator implements Comparator<Human>{
 
 		@Override
@@ -39,17 +47,26 @@ public abstract class Human extends GameObject {
 		}
 	}
 
+	/**
+	 * Used to represent the different sex types possible an Human can have.
+	 */
 	public enum SexType {
 		MALE,
 		FEMALE,
 	}
 
+	/**
+	 * Used to represent the different state of interaction an Human can be in
+	 */
 	private enum InteractionState{
 		NONE,
 		STARTED,
 		DONE;
 	}
 
+	/**
+	 * Used to represent the different status an Human can be in
+	 */
 	private enum StatusState{
 		ALIVE,
 		DEAD,
@@ -74,61 +91,116 @@ public abstract class Human extends GameObject {
 	private InteractionState _interaction = InteractionState.NONE;
 	private Color _colorSave;
 	private final String _name;
-	private Human _currentPartner;
+	private Human _currentMate;
 	private int _interactionDuration = 0;
 	private StatusState _status = StatusState.ALIVE;
 
-
+	/**
+	 * Get the current name of this Human
+	 * @return the current name 
+	 */
 	public String getName(){
 		return _name;
 	}
 
+	/**
+	 * Set the destination with a position. Target will be null.
+	 * @param dest The vector2 location to move toward.
+	 */
 	public void setDestination(Vector2 dest) {
 		_dest.pos = dest;
 		_dest.target = null;
 	}
 	
+	/**
+	 * Set the destination with a target. The position with be the position of the target.
+	 * If the target move, it will update it's location automatically.
+	 * @param t The target to move toward.
+	 */
 	public void setDestination(GameObject t) {
 		if(t != null) _dest.pos = t.getTransform().getPos();
 		else _dest.pos = null;
 		_dest.target = t;
 	}
 
+	/**
+	 * Get the current destination of this Human
+	 * @return current destination
+	 */
 	protected Destination getDestination(){
 		return _dest;
 	}
 
+	/**
+	 * Set the current goal to execute when reaching the destination
+	 * @param fc The action to execute
+	 * @param duration The duration of the interaction
+	 */
 	public void setGoal(GoalExecute fc, int duration){
 		_currentGoal = fc;
 		_interactionDuration = duration > 0? duration:0;
 	}
 
+	/**
+	 * Get the current partner of this Human
+	 * @return the current partner
+	 */
 	protected Human getCurrentPartner(){
-		return _currentPartner;
+		return _currentMate;
 	}
 
-	protected void setCurrentPartner(Human h){
-		_currentPartner = h;
+	/**
+	 * Set the current partner. Can only be the opposite sex.
+	 * @param h Human to mate with
+	 */
+	protected void setCurrentMate(Human h){
+		if(h != null && h.getSex() == getSex()) return;
+		_currentMate = h;
 	}
 
+	/**
+	 * Get all the needs of this Human
+	 * @return an object conaining all the needs
+	 */
 	protected Needs getNeeds(){
 		return _needs;
 	}
 
+	/**
+	 * Get the sexe of this Human
+	 * @return the current sexetype
+	 */
 	public SexType getSex(){
 		return _sex;
 	}
 
-	public void setSex(SexType t){
+	/**
+	 * Set the sextype of this Human
+	 * @param t Sextype tobe defined with
+	 */
+	private void setSex(SexType t){
 		_sex = t;
 	}
 
+	/**
+	 * Create a Human that have needs (hunger, thrist, reproductiveUrge), that can move toward a destination or a target.
+	 * Once the target reached, it execute the action defined by it's current goal.
+	 * @param pop The population this Human is in. Can't be null.
+	 * @param sex The sexe of this Human
+	 * @param pos The starting pos of this Human. Default (0,0)
+	 * @param color The color of this Human. Default color depend on sexe.
+	 * @throws NullPointerException() if population or sex is null!
+	 */
 	public Human(IPopulation<Human> pop, SexType sex, Vector2 pos, Color color) {
+		if(pop == null) 
+			throw new NullPointerException("Human population can't be null!");
 		this.population = pop;
-		_sex = sex;
+		
 		_dest = new Destination();
 		_needs = new Needs();
 		_name = generateName();
+
+		setSex(sex);
 
 		_needs.addNeed("hunger",0, 200, 0.2f, ()->findNearestFood(), ()->die());
 		_needs.addNeed("thirst",0, 200, 0.2f, ()->findNearestWaterSource(), ()->die());
@@ -143,7 +215,10 @@ public abstract class Human extends GameObject {
 		getTransform().setPos(pos==null?new Vector2():pos);
 		setZIndex(ZINDEX);
 	}
-		
+	
+	/**
+	 * Update method: called x number of time per seconds.
+	 */
 	@Override
 	public void update() {
 		_needs.updateAllNeeds();
@@ -166,6 +241,11 @@ public abstract class Human extends GameObject {
 		}
 	}
 
+	/**
+	 * Used to generate a String name from sratch. The first letter will be in upperCase while the rest will be in lower.
+	 * The name lenght will be between 5 and 10 included.
+	 * @return The generated name
+	 */
 	public String generateName(){
 
 		final String lexicon = "abcdefghijklmnopqrstuvwxyz";
@@ -182,12 +262,22 @@ public abstract class Human extends GameObject {
 		return builder.toString().substring(0,1).toUpperCase() + builder.toString().substring(1);
 	}
 
+	/**
+	 * Used to update all the basic needs of this Human (thrist, hunger, reproductiveUrge)
+	 */
+	//TODO complete!
 	private void updateNeedsUI() {
 		updateNeedUI("thirst", 2);
 		updateNeedUI("reproductiveUrge", 3);
 		updateNeedUI("hunger", 4);
 	}
-
+	
+	/**
+	 * Update the UI of the need in argument, if exist
+	 * @param name The string name of the need
+	 * @param meshIndex the index of the mesh(rectangle) in the mesh list binded to this human
+	 */
+	//TODO replace sysout with throw
 	private void updateNeedUI(String name, int meshIndex){
 		try {
 			Rectangle r = (Rectangle)this.getMesh(meshIndex);
@@ -202,11 +292,19 @@ public abstract class Human extends GameObject {
 		
 	}
 
+	/**
+	 * Update the destination if the destination is a target. Do nothing if it's not.
+	 */
 	protected void updateDestination() {
 		if(_dest.target == null) return;
 		setDestination( _dest.target);
 	}
 
+	/**
+	 * Select a new destination based on the needs priority (at least above 50).
+	 * The {@code executeActionToFulfillNeed()} of the needs will be call in order of priority, until a destination is set.
+	 * If no destination is set, then the Human will have the goal {@code wander()}
+	 */
 	protected void selectDestination() {
 		Need[] nArr = _needs.sortNeedsByPriority();
 
@@ -227,6 +325,9 @@ public abstract class Human extends GameObject {
 
 	}
 
+	/**
+	 * Used to exectute the current goal, then reset the {@code InteractionState}, the goal, and the destination
+	 */
 	protected void executeGoal(){
 		if(_currentGoal != null){
 			_currentGoal.execute();
@@ -236,20 +337,36 @@ public abstract class Human extends GameObject {
 		setDestination((GameObject)null);
 	}
 
-	protected boolean drink(){
+	/**
+	 * Goal to satisfy the need {@code thirst} and set it to 0.
+	 * @return
+	 */
+	protected void drink(){
 		_needs.getNeed("thrist").setCurrentValue(0);
-		return true;
 	}
 
-	protected boolean eat(){
+	/**
+	 * Goal to satisfy the need {@code hunger} and set it to 0.
+	 * @return
+	 */
+	protected void eat(){
 		_needs.getNeed("hunger").setCurrentValue(0);
-		return true;
 	}
 
+	/**
+	 * Abstract: Used to obtain a new mate.
+	 */
 	protected abstract void findMate();
 
-	protected abstract boolean reproduce();
+	/**
+	 * Goal to satisfy the need {@code reproductiveUrge}.
+	 */
+	protected abstract void reproduce();
 
+	/**
+	 * Used to simule interaction when executing a goal, making the Human wait until the end of the duration to get a new destination.
+	 * The color while interacting is changed.
+	 */
 	protected void interact() {
 		if(_interactionTimer > _interactionDuration){
 			getMesh(0).setFillColor(_colorSave);
@@ -265,14 +382,24 @@ public abstract class Human extends GameObject {
 		}
 	}
 
+	/**
+	 * Used to end the interaction.
+	 */
 	protected void endInteraction(){
 		_interaction = InteractionState.DONE;
 	}
 
-	protected boolean wander(){
-		return true;
+	/**
+	 * Default goal. Do nothing, and immediately set a new destination. No interaction.
+	 */
+	protected void wander(){
+		
 	}
 
+	/**
+	 * Used to set the destination to the nearest water ressource.
+	 * The ressource population must be in the same world as this Human population.
+	 */
 	protected void findNearestWaterSource(){
 		Vector2 nearestSource = null;
 		IWorld w =  this.population.getWorld();
@@ -288,6 +415,10 @@ public abstract class Human extends GameObject {
 		//return nearestSource;
 	}
 	
+	/**
+	 * Used to set the destination to the nearest food ressource.
+	 * The ressource population must be in the same world as this Human population.
+	 */
 	protected void findNearestFood(){
 		Vector2 nearestFood = null;
 		
@@ -300,17 +431,34 @@ public abstract class Human extends GameObject {
 		//return nearestFood;
 	}
 
+	/**
+	 * Select a random Vector2 location inside a given rectangle
+	 * @param w width of the rectangle
+	 * @param h height of the rectangle
+	 * @param x coordinate of the rectangle
+	 * @param y coordinate of the rectangle
+	 * @return the Vector2 location randomly chosen
+	 */
 	protected Vector2 selectRadomPlaceOnWorld(int w, int h, int x, int y) {
 		return new Vector2((float)Math.random()*w + x,
 				(float)Math.random()*h + y);
 	}
 
+	/**
+	 * Selet a random Vector2 location around this Human between a max radius.
+	 * @param maxRadius the radius around this Human
+	 * @return the Vector2 location randomly chosen
+	 */
 	protected Vector2 selectRadomPlaceAround(float maxRadius) {
 		float angle = (float)(Math.random()*Math.PI*2);
 		float radius = (float)(Math.random()*maxRadius);
 		return getTransform().getPos().plus( new Vector2((float)(Math.cos(angle) * radius), (float)(Math.sin(angle) * radius)));
 	}
 
+	/**
+	 * Check if the destination is reached. 
+	 * @return true if it is, false else
+	 */
 	protected boolean arrived() {
 		// TODO Auto-generated method stub
 		if(_dest.pos == null) return false;
@@ -318,6 +466,9 @@ public abstract class Human extends GameObject {
 		else return false;
 	}
 	
+	/**
+	 * Move this Human toward the destination. The movement is proportional to it's speed and the framerate.
+	 */
 	protected void moveTowardDestination() {
 		if(_dest == null ||_dest.pos == null) return;
 		Vector2 distNormalized = Vector2.normalize(_dest.pos.minus(getTransform().getPos()));
@@ -325,6 +476,9 @@ public abstract class Human extends GameObject {
 		getTransform().setPos(getTransform().getPos().plus(distNormalized.multiply(SPEED)));
 	}
 
+	/**
+	 * Make this Human die, removing it from the world and destroying it.
+	 */
 	protected void die(){
 		_status = StatusState.DEAD;
 		population.removeFromPopulation(this);
