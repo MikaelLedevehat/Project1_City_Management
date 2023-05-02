@@ -1,3 +1,16 @@
-# Project1_City_Management
-It's a project to dive deeper into java, make use of a lot of tools and functionalities, like Design patern and BDD uses. Also it's to create my own graphic "engine" and interface. 
-<span style="color:blue">some *This is Blue italic.* text</span>
+
+# Le langage Java 
+
+---
+
+### Introduction
+
+Les caracteristiques du langage Java:
+
++ Il s'agit d'un langage **orienté objet**
++ Il est *portable*
++ Il est multithreadé
+
+### Documentation
+
+Lien vers la <span style="color:blue">documentation officielle</span> : [Documentation](https://docs.oracle.com/en/java/)
