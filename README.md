@@ -11,4 +11,4 @@ Les caracteristiques du langage Java:
 
 ### Documentation
 
-Lien vers la <span style="color:blue">documentation officielle</span> : [Documentation](https://docs.oracle.com/en/java/)
+Lien vers la <span style="color:red">documentation officielle</span> : [Documentation](https://docs.oracle.com/en/java/)
