@@ -1,28 +1,32 @@
-/*Copyright 2021 Google LLC
-*
-*Author: Mikael Le Devehat
-*Use of this source code is governed by an MIT-style
-*license that can be found in the LICENSE file or at
-https://opensource.org/licenses/MIT.
-*/
-
 package com.citymanagement.gameobjects;
 
 import com.customgraphicinterface.core.GameObject;
-import com.customgraphicinterface.geometry.Circle;
 import com.customgraphicinterface.utilities.Vector2;
-import java.awt.Color;
 
+//TODO implement durability
+/**
+ * A class used to represent a Ressource, usable by other game objects.
+ */
 public abstract class Ressource extends GameObject{
 
+    /**
+     * Create a new Ressource.
+     * @param pos the position the ressource will be created at.
+     */
     public Ressource( Vector2 pos){
         getTransform().setPos(pos);
     }
 
+    /**
+     * Called each frame.
+     */
     @Override
     public void update() {
         
     }
 
+    /**
+     * Abstract method use to implement how the resource will be use.
+     */
     public abstract void use();
 }

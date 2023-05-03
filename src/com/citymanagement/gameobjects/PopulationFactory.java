@@ -1,11 +1,3 @@
-/*Copyright 2021 Google LLC
-*
-*Author: Mikael Le Devehat
-*Use of this source code is governed by an MIT-style
-*license that can be found in the LICENSE file or at
-https://opensource.org/licenses/MIT.
-*/
-
 package com.citymanagement.gameobjects;
 
 import com.citymanagement.gameobjects.HumanFactory.HumanType;
@@ -14,17 +6,33 @@ import com.customgraphicinterface.factory.IFactory;
 
 import java.lang.reflect.InvocationTargetException;
 
+/**
+ * This class is used to create a factory that make population of a given type, and fill it if desired.
+ */
 @SuppressWarnings("unchecked")
 public final class PopulationFactory implements IFactory<IPopulation<? extends GameObject>>{
 
+    //TODO create commentary
+    //TODO delete other factory methods
+    //TODO Ressources type should not be there.
     public enum RessourceType {
         FOOD,
     }
 
+    /**
+     * Create a new Population factory.
+     * @return a new PopulationFactory.
+     */
     public static PopulationFactory build(){
         return new PopulationFactory();
     }
 
+    /**
+     * Create a Population that hold ressources.
+     * @param number the number of ressources that will already be filled inside the population.
+     * @param options options concerning Ressource: 
+     * @return
+     */
     public IPopulation<? extends GameObject> createRessourcePopulation(int number, Object... options){
         IPopulation<? extends GameObject> p = Population.build(Ressource.class);
 
@@ -64,7 +72,7 @@ public final class PopulationFactory implements IFactory<IPopulation<? extends G
                 GameObject g = (GameObject)method.invoke(null, p,t,options);*/
 
                 GameObject g = f.make();
-                ((IPopulation<? super GameObject>)p).addToPopulation(g);
+                ((IPopulation<? super GameObject>)p).getPopulationList().add(g);
             }
         } catch (ClassNotFoundException e) {
             throw new NoSuchFactoryException("Error: Can't access " + c.getSimpleName() + " factory!",e);
@@ -76,6 +84,7 @@ public final class PopulationFactory implements IFactory<IPopulation<? extends G
         }
     }
 
+    
     @Override
     public IPopulation<? extends GameObject> make(Object... options) {
 

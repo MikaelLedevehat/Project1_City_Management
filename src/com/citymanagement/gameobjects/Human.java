@@ -481,7 +481,7 @@ public abstract class Human extends GameObject {
 	 */
 	protected void die(){
 		_status = StatusState.DEAD;
-		population.removeFromPopulation(this);
+		population.getPopulationList().remove(this);
 		destroy();
 	}
 }

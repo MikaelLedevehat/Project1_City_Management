@@ -32,7 +32,7 @@ public class HumanFemale extends Human {
     //TODO Make birth of multiple human possible
     private void birth(){
         int r = (int)(Math.random() * 2);
-		population.addToPopulation(HumanFactory.build().make(population));
+		population.getPopulationList().add(HumanFactory.build().make(population));
         this.getMesh(0).setFillColor(DEFAULT_COLOR);
         this.getNeeds().removeNeed("birth");
         _isPregnant = false;
