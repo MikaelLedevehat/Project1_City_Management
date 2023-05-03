@@ -1,14 +1,23 @@
+# City Management Project
 
-# Le langage Java 
+This project is a java demonstraction using a lot of differents technologies to create a small graphic simulation, in witch some little creatures will thrive and evolve. 
 
-### Introduction
+This project use mostly Java SE, with technologies like Swing, Hibernate, AWT, and does multithreading. 
 
-Les caracteristiques du langage Java:
 
-+ Il s'agit d'un langage **orienté objet**
-+ Il est *portable*
-+ Il est multithreadé
+## Authors
 
-### Documentation
+- [@MikaelLedevehat](https://www.github.com/MikaelLedevehat)
 
-Lien vers la <span style="color:red">documentation officielle</span> : [Documentation](https://docs.oracle.com/en/java/)
+
+## Features
+
+- Automated simulation
+- Persistent storage of informations
+- Fullscreen mode
+- Multiple biomes, with customization
+
+
+## License
+
+[MIT](https://choosealicense.com/licenses/mit/)
